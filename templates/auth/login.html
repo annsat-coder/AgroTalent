@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Iniciar Sesión{% endblock %}
+{% block extra_css %}
+<style>
+.rol-selector { display: flex; gap: 8px; margin-bottom: 1.25rem; }
+.rol-btn {
+  flex: 1; padding: .65rem; border: 1.5px solid #dee2e6; border-radius: 10px;
+  background: #fff; cursor: pointer; text-align: center; transition: all .15s;
+  font-size: .88rem; font-weight: 500; color: #6c757d;
+}
+.rol-btn:hover { border-color: #1a6e2e; color: #1a6e2e; }
+.rol-btn.activo { border-color: #1a6e2e; background: #f0fdf4; color: #1a6e2e; font-weight: 600; }
+.rol-btn i { display: block; font-size: 1.4rem; margin-bottom: .2rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-4">
+  <div class="col-12 col-md-5 col-lg-4">
+    <div class="text-center mb-4">
+      <i class="bi bi-leaf-fill text-success" style="font-size:2.5rem"></i>
+      <h4 class="fw-bold mt-2">AgroTalent</h4>
+      <p class="text-muted small">Sistema de Reclutamiento Digital · ProAgro S.A.</p>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+
+        <!-- Selector de rol -->
+        <p class="fw-semibold small text-muted mb-2">¿Quién eres?</p>
+        <div class="rol-selector">
+          <div class="rol-btn activo" id="btnPostulante" onclick="seleccionarRol('postulante')">
+            <i class="bi bi-person-fill"></i>
+            Postulante
+          </div>
+          <div class="rol-btn" id="btnPersonal" onclick="seleccionarRol('personal')">
+            <i class="bi bi-building-fill"></i>
+            Personal ProAgro
+          </div>
+        </div>
+
+        <form method="POST">
+          <input type="hidden" name="tipo_login" id="tipoLogin" value="postulante">
+
+          <!-- Campo DNI (postulante) -->
+          <div id="campoDNI" class="mb-3">
+            <label class="form-label fw-semibold">DNI</label>
+            <input type="text" name="dni" id="inputDNI"
+                   class="form-control form-control-lg rounded-3"
+                   placeholder="8 dígitos" maxlength="8" autofocus>
+          </div>
+
+          <!-- Campo correo (personal) -->
+          <div id="campoCorreo" class="mb-3" style="display:none">
+            <label class="form-label fw-semibold">Correo institucional</label>
+            <input type="email" name="correo" id="inputCorreo"
+                   class="form-control form-control-lg rounded-3"
+                   placeholder="usuario@proagro.pe" disabled>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Contraseña</label>
+            <input type="password" name="password" class="form-control form-control-lg rounded-3"
+                   placeholder="••••••••" required>
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-box-arrow-in-right"></i> Ingresar
+            </button>
+          </div>
+        </form>
+
+        <hr class="my-3">
+        <div class="text-center small">
+          ¿No tienes cuenta?
+          <a href="{{ url_for('registro') }}" class="text-success fw-semibold">Regístrate aquí</a>
+        </div>
+
+        {% if config.DEBUG %}
+        <div class="bg-light rounded-3 p-3 mt-3 small text-muted">
+          <strong>Acceso staff (modo prototipo):</strong><br>
+          Jefe RR.HH.: <code>rrhh@proagro.pe</code> / <code>rrhh1234</code><br>
+          Médico: <code>medico@proagro.pe</code> / <code>medico1234</code>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+    <div class="text-center mt-3">
+      <a href="{{ url_for('index') }}" class="text-muted small">
+        <i class="bi bi-arrow-left"></i> Volver al inicio
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function seleccionarRol(rol) {
+  const esPostulante = rol === 'postulante';
+  document.getElementById('tipoLogin').value = rol;
+
+  document.getElementById('btnPostulante').classList.toggle('activo', esPostulante);
+  document.getElementById('btnPersonal').classList.toggle('activo', !esPostulante);
+
+  document.getElementById('campoDNI').style.display    = esPostulante ? 'block' : 'none';
+  document.getElementById('campoCorreo').style.display = esPostulante ? 'none'  : 'block';
+
+  document.getElementById('inputDNI').disabled    = !esPostulante;
+  document.getElementById('inputCorreo').disabled =  esPostulante;
+
+  document.getElementById(esPostulante ? 'inputDNI' : 'inputCorreo').focus();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Mis datos{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-7 col-lg-6">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <a href="{{ url_for('postulante_dashboard') }}" class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-arrow-left"></i></a>
+      <h5 class="fw-bold mb-0">Datos personales</h5>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <form method="POST">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Nombre completo <span class="text-danger">*</span></label>
+              <input type="text" name="nombres" class="form-control form-control-lg rounded-3"
+                     value="{{ postulante.nombres or '' }}"
+                     placeholder="Ingresa tus nombres completos" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Apellidos <span class="text-danger">*</span></label>
+              <input type="text" name="apellidos" class="form-control form-control-lg rounded-3"
+                     value="{{ postulante.apellidos or '' }}"
+                     placeholder="Ingresa tus apellidos completos" required>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label fw-semibold">Fecha de nacimiento <span class="text-danger">*</span></label>
+              <input type="date" name="fecha_nacimiento" class="form-control form-control-lg rounded-3"
+                     value="{{ postulante.fecha_nacimiento.strftime('%Y-%m-%d') if postulante.fecha_nacimiento else '' }}" required>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label fw-semibold">Sexo <span class="text-danger">*</span></label>
+              <select name="sexo" class="form-select form-select-lg rounded-3" required>
+                <option value="">Seleccionar...</option>
+                <option value="Masculino" {% if postulante.sexo == 'Masculino' %}selected{% endif %}>Masculino</option>
+                <option value="Femenino"  {% if postulante.sexo == 'Femenino'  %}selected{% endif %}>Femenino</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Grado de instrucción <span class="text-danger">*</span></label>
+              <select name="grado_instruccion" class="form-select form-select-lg rounded-3" required>
+                <option value="">Seleccionar...</option>
+                {% for g in grados %}
+                <option value="{{ g }}" {% if postulante.grado_instruccion == g %}selected{% endif %}>{{ g }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Distrito de residencia (Piura) <span class="text-danger">*</span></label>
+              <select name="distrito" class="form-select form-select-lg rounded-3" required>
+                <option value="">Seleccionar...</option>
+                {% for d in distritos %}
+                <option value="{{ d }}" {% if postulante.distrito == d %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Puesto al que postula <span class="text-danger">*</span></label>
+              <select name="puesto" class="form-select form-select-lg rounded-3" required>
+                <option value="">Seleccionar...</option>
+                {% for p in puestos %}
+                <option value="{{ p }}" {% if postulante.puesto == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+              {% if not puestos %}
+              <div class="form-text text-warning"><i class="bi bi-exclamation-triangle"></i> No hay convocatoria activa con puestos configurados.</div>
+              {% endif %}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">¿Eres ex-trabajador de ProAgro? <span class="text-danger">*</span></label>
+              <div class="d-flex gap-3 mt-1">
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="es_extrabajador" value="si" id="extSi"
+                         {% if postulante.es_extrabajador %}checked{% endif %} required>
+                  <label class="form-check-label fw-semibold" for="extSi">Sí</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="es_extrabajador" value="no" id="extNo"
+                         {% if postulante.datos_completos and not postulante.es_extrabajador %}checked{% endif %} required>
+                  <label class="form-check-label fw-semibold" for="extNo">No</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-check-circle-fill"></i> Guardar datos
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

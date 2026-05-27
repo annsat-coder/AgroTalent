@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Verificar cuenta{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-4">
+  <div class="col-12 col-md-5 col-lg-4">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4 text-center">
+        <i class="bi bi-phone-fill text-success" style="font-size:3rem"></i>
+        <h5 class="fw-bold mt-3">Verifica tu cuenta</h5>
+        <p class="text-muted small">Se generó un código de 6 dígitos para el celular <strong>{{ usuario.celular }}</strong>.</p>
+
+        {% if usuario.otp_code %}
+        <div class="alert alert-info rounded-3 mb-3 small">
+          <i class="bi bi-info-circle-fill"></i>
+          <strong>Modo prototipo:</strong> Tu código es <span class="fs-4 fw-bold" style="letter-spacing:.3rem">{{ usuario.otp_code }}</span>
+          <br><small class="text-muted">En producción se enviaría por SMS.</small>
+        </div>
+        {% endif %}
+
+        <!-- Temporizador -->
+        <div class="mb-3">
+          <div class="d-inline-flex align-items-center gap-2 bg-light rounded-3 px-3 py-2">
+            <i class="bi bi-clock text-warning"></i>
+            <span class="small text-muted">El código expira en:</span>
+            <span id="timer" class="fw-bold text-danger fs-5">05:00</span>
+          </div>
+        </div>
+
+        <form method="POST" class="text-start">
+          <input type="hidden" name="accion" value="verificar">
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Código de verificación</label>
+            <input type="text" name="codigo" id="codigoInput"
+                   class="form-control form-control-lg rounded-3 text-center fw-bold"
+                   placeholder="______" maxlength="6" pattern="\d{6}" required autofocus
+                   style="font-size:1.8rem; letter-spacing:.4rem">
+          </div>
+          <div class="d-grid mb-3">
+            <button type="submit" id="btnVerificar" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-check-circle-fill"></i> Verificar
+            </button>
+          </div>
+        </form>
+
+        <form method="POST" id="formReenviar">
+          <input type="hidden" name="accion" value="reenviar">
+          <button type="submit" id="btnReenviar" class="btn btn-link text-muted small p-0" disabled>
+            <i class="bi bi-arrow-clockwise"></i> Reenviar código <span id="reenviarLabel">(espera el temporizador)</span>
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+(function () {
+  const DURACION = 5 * 60; // 5 minutos en segundos
+  let restante = DURACION;
+  const timerEl = document.getElementById('timer');
+  const btnReenviar = document.getElementById('btnReenviar');
+  const reenviarLabel = document.getElementById('reenviarLabel');
+
+  function actualizar() {
+    const m = Math.floor(restante / 60).toString().padStart(2, '0');
+    const s = (restante % 60).toString().padStart(2, '0');
+    timerEl.textContent = `${m}:${s}`;
+
+    if (restante <= 60) timerEl.classList.add('text-danger');
+    else timerEl.classList.remove('text-danger');
+
+    if (restante <= 0) {
+      clearInterval(intervalo);
+      timerEl.textContent = '00:00';
+      timerEl.classList.add('text-danger');
+      btnReenviar.disabled = false;
+      reenviarLabel.textContent = '';
+      document.getElementById('btnVerificar').disabled = true;
+      document.getElementById('codigoInput').disabled = true;
+    }
+    restante--;
+  }
+
+  actualizar();
+  const intervalo = setInterval(actualizar, 1000);
+})();
+</script>
+{% endblock %}

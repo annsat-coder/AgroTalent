@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}{{ induccion.titulo }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <a href="{{ url_for('postulante_inducciones') }}" class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-arrow-left"></i></a>
+      <div>
+        <h5 class="fw-bold mb-0">{{ induccion.titulo }}</h5>
+        <small class="text-muted">Inducción {{ induccion.orden }} de 4</small>
+      </div>
+    </div>
+
+    {% set av = avance %}
+    {% set video_visto = av and av.video_completado %}
+    {% set ya_aprobada = av and av.aprobado %}
+
+    {% if ya_aprobada %}
+    <!-- Inducción ya aprobada -->
+    <div class="card border-0 shadow-sm rounded-4 border-start border-4 border-success">
+      <div class="card-body p-4 text-center">
+        <i class="bi bi-check-circle-fill text-success" style="font-size:3rem"></i>
+        <h5 class="fw-bold mt-3">¡Inducción aprobada!</h5>
+        <p class="text-muted">Puedes continuar con la siguiente inducción.</p>
+        <a href="{{ url_for('postulante_inducciones') }}" class="btn btn-success rounded-3 px-4">
+          <i class="bi bi-arrow-right-circle"></i> Volver a inducciones
+        </a>
+      </div>
+    </div>
+
+    {% elif not video_visto %}
+    <!-- PASO 1: Ver el video -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-2">
+          <span class="badge bg-success me-2">Paso 1</span>
+          Ver el video completo
+        </h6>
+        <p class="text-muted small mb-3">{{ induccion.descripcion }}</p>
+
+        <div class="ratio ratio-16x9 rounded-3 overflow-hidden bg-dark mb-3">
+          <iframe id="videoFrame" src="{{ induccion.video_url }}" title="{{ induccion.titulo }}"
+                  allowfullscreen class="rounded-3"></iframe>
+        </div>
+
+        <!-- Barra de progreso del video simulada -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small text-muted mb-1">
+            <span>Progreso del video</span>
+            <span id="tiempoRestante">Debes ver el video completo</span>
+          </div>
+          <div class="progress rounded-pill" style="height:10px">
+            <div id="barraProgreso" class="progress-bar bg-success" style="width:0%;transition:width 1s linear"></div>
+          </div>
+        </div>
+
+        <div id="btnContinuar" style="display:none">
+          <div class="alert alert-success rounded-3 small mb-3">
+            <i class="bi bi-check-circle-fill"></i> ¡Video completado! Ahora responde el cuestionario.
+          </div>
+          <form method="POST" id="formVideoCompleto">
+            <input type="hidden" name="accion" value="video_completado">
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success btn-lg rounded-3">
+                <i class="bi bi-arrow-right-circle-fill"></i> Ir al cuestionario
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div id="avisoVideo" class="alert alert-warning rounded-3 small mt-3">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          El cuestionario se habilitará automáticamente cuando termines de ver el video.
+        </div>
+      </div>
+    </div>
+
+    {% else %}
+    <!-- PASO 2: Cuestionario -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-1">
+          <span class="badge bg-warning text-dark me-2">Paso 2</span>
+          Cuestionario de verificación
+        </h6>
+        <p class="text-muted small mb-4">Responde las {{ induccion.preguntas|length }} preguntas. Debes acertar <strong>todas</strong> para aprobar.</p>
+
+        <form method="POST">
+          <input type="hidden" name="accion" value="cuestionario">
+          {% for preg in preguntas %}
+          <div class="mb-4">
+            <p class="fw-semibold mb-2">{{ loop.index }}. {{ preg.texto }}</p>
+            <div class="d-grid gap-2">
+              {% for opcion, letra in [(preg.opcion_a,'a'),(preg.opcion_b,'b'),(preg.opcion_c,'c')] %}
+              <div class="form-check option-card rounded-3 p-3 border">
+                <input class="form-check-input" type="radio" name="preg_{{ preg.id }}"
+                       id="p{{ preg.id }}_{{ letra }}" value="{{ letra }}" required>
+                <label class="form-check-label w-100" for="p{{ preg.id }}_{{ letra }}">
+                  <span class="badge bg-light text-dark border me-2">{{ letra.upper() }}</span> {{ opcion }}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-send-fill"></i> Enviar respuestas
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+{% if not (avance and avance.video_completado) and not (avance and avance.aprobado) %}
+<script>
+// Simulación de progreso del video: dura 30 segundos en prototipo (en prod sería la duración real)
+const DURACION_SIMULADA = 30;
+let transcurrido = 0;
+const barra = document.getElementById('barraProgreso');
+const tiempoEl = document.getElementById('tiempoRestante');
+const btnContinuar = document.getElementById('btnContinuar');
+const avisoVideo = document.getElementById('avisoVideo');
+
+const intervalo = setInterval(() => {
+  transcurrido++;
+  const pct = Math.min((transcurrido / DURACION_SIMULADA) * 100, 100);
+  barra.style.width = pct + '%';
+  const restante = DURACION_SIMULADA - transcurrido;
+  if (restante > 0) {
+    tiempoEl.textContent = `Tiempo restante: ${restante}s`;
+  } else {
+    clearInterval(intervalo);
+    tiempoEl.textContent = '¡Completado!';
+    barra.classList.add('bg-success');
+    btnContinuar.style.display = 'block';
+    avisoVideo.style.display = 'none';
+    // Auto-submit para marcar video como completado
+    document.getElementById('formVideoCompleto').submit();
+  }
+}, 1000);
+</script>
+{% endif %}
+{% endblock %}

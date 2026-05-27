@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contrato — {{ postulante.nombres }} {{ postulante.apellidos }}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Times New Roman', serif; font-size: 12pt; color: #000; background: #fff; }
+    .page { max-width: 210mm; margin: 0 auto; padding: 20mm 25mm; }
+    .header { text-align: center; margin-bottom: 24pt; }
+    .header h1 { font-size: 14pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .header h2 { font-size: 11pt; font-weight: normal; margin-top: 4pt; }
+    .header p { font-size: 10pt; color: #555; margin-top: 4pt; }
+    h3 { font-size: 11pt; font-weight: bold; text-transform: uppercase;
+         border-bottom: 1px solid #000; padding-bottom: 3pt; margin: 18pt 0 10pt; }
+    .field-row { display: flex; gap: 20pt; margin-bottom: 8pt; }
+    .field { flex: 1; }
+    .field-label { font-size: 9pt; color: #555; margin-bottom: 2pt; }
+    .field-value { font-size: 11pt; font-weight: bold; border-bottom: 1px solid #999;
+                   padding-bottom: 2pt; min-width: 80pt; }
+    .field-value.blank { min-height: 16pt; }
+    p.body-text { text-align: justify; line-height: 1.6; margin-bottom: 10pt; font-size: 11pt; }
+    .clausulas { margin-top: 10pt; }
+    .clausula { margin-bottom: 12pt; }
+    .clausula-titulo { font-weight: bold; font-size: 11pt; }
+    .clausula-texto { text-align: justify; line-height: 1.6; font-size: 11pt; }
+    .firmas { display: flex; justify-content: space-between; margin-top: 40pt; }
+    .firma-box { text-align: center; width: 45%; }
+    .firma-linea { border-top: 1px solid #000; margin-top: 30pt; padding-top: 6pt; }
+    .firma-nombre { font-size: 10pt; font-weight: bold; }
+    .firma-cargo { font-size: 9pt; color: #555; }
+    .no-print { background: #1a6e2e; color: white; border: none; padding: 10px 24px;
+                border-radius: 8px; font-size: 13px; cursor: pointer; margin: 16px 8px 0 0; }
+    .no-print.sec { background: #6c757d; }
+    .no-print-bar { padding: 12px 25mm; background: #f8f9fa; border-bottom: 1px solid #dee2e6; }
+    @media print {
+      .no-print-bar { display: none !important; }
+      .page { padding: 15mm 20mm; }
+      body { font-size: 11pt; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="no-print-bar">
+  <button class="no-print" onclick="window.print()">
+    🖨️ Imprimir / Guardar PDF
+  </button>
+  <button class="no-print sec" onclick="window.close()">
+    ← Volver
+  </button>
+</div>
+
+<div class="page">
+
+  <!-- Encabezado -->
+  <div class="header">
+    <h1>ProAgro S.A.</h1>
+    <h2>Contrato de Trabajo a Plazo Fijo — Personal Temporal de Campo</h2>
+    <p>Fundo ProAgro — Km 12 Carretera Piura-Chulucanas, Piura, Perú</p>
+  </div>
+
+  <!-- Datos de las partes -->
+  <h3>I. Datos del empleador</h3>
+  <div class="field-row">
+    <div class="field">
+      <div class="field-label">Razón social</div>
+      <div class="field-value">ProAgro S.A.</div>
+    </div>
+    <div class="field">
+      <div class="field-label">RUC</div>
+      <div class="field-value">20XXXXXXXXX</div>
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <div class="field-label">Representante legal</div>
+      <div class="field-value blank"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">DNI representante</div>
+      <div class="field-value blank"></div>
+    </div>
+  </div>
+
+  <h3>II. Datos del trabajador</h3>
+  <div class="field-row">
+    <div class="field">
+      <div class="field-label">Apellidos y nombres</div>
+      <div class="field-value">{{ postulante.apellidos }} {{ postulante.nombres }}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">DNI</div>
+      <div class="field-value">{{ postulante.dni }}</div>
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <div class="field-label">Fecha de nacimiento</div>
+      <div class="field-value">{{ postulante.fecha_nacimiento.strftime('%d/%m/%Y') if postulante.fecha_nacimiento else '________' }}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Sexo</div>
+      <div class="field-value">{{ postulante.sexo or '________' }}</div>
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <div class="field-label">Distrito de residencia</div>
+      <div class="field-value">{{ postulante.distrito or '________' }}, Piura</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Celular</div>
+      <div class="field-value">{{ postulante.usuario.celular }}</div>
+    </div>
+  </div>
+
+  <h3>III. Condiciones del contrato</h3>
+  <div class="field-row">
+    <div class="field">
+      <div class="field-label">Puesto de trabajo</div>
+      <div class="field-value">{{ postulante.puesto or '________' }}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Campaña</div>
+      <div class="field-value">{{ conv.nombre if conv else '________' }}</div>
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <div class="field-label">Fecha de inicio</div>
+      <div class="field-value">{{ conv.fecha_presentacion.strftime('%d/%m/%Y') if conv else '________' }}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Fecha de término</div>
+      <div class="field-value blank"></div>
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <div class="field-label">Remuneración diaria (S/)</div>
+      <div class="field-value blank"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">Jornada diaria</div>
+      <div class="field-value">8 horas</div>
+    </div>
+  </div>
+
+  <h3>IV. Cláusulas</h3>
+  <div class="clausulas">
+    <div class="clausula">
+      <div class="clausula-titulo">PRIMERA — Objeto del contrato</div>
+      <div class="clausula-texto">El EMPLEADOR contrata los servicios del TRABAJADOR para desempeñar el puesto indicado en el acápite III, en las instalaciones del Fundo ProAgro ubicado en Km 12 Carretera Piura-Chulucanas, durante el período de la campaña señalada.</div>
+    </div>
+    <div class="clausula">
+      <div class="clausula-titulo">SEGUNDA — Obligaciones del trabajador</div>
+      <div class="clausula-texto">El TRABAJADOR se compromete a cumplir con el reglamento interno de trabajo, las normas de seguridad y salud ocupacional, los estándares de calidad de ProAgro S.A., y a mantener la confidencialidad de la información de la empresa.</div>
+    </div>
+    <div class="clausula">
+      <div class="clausula-titulo">TERCERA — Beneficios sociales</div>
+      <div class="clausula-texto">El TRABAJADOR tendrá derecho a los beneficios establecidos por la legislación laboral peruana vigente aplicable a contratos temporales, incluyendo seguro de salud (EsSalud) y compensación por tiempo de servicios proporcional al período laborado.</div>
+    </div>
+    <div class="clausula">
+      <div class="clausula-titulo">CUARTA — Conformidad</div>
+      <div class="clausula-texto">Ambas partes declaran haber leído y aceptado íntegramente los términos del presente contrato, firmando en señal de conformidad en la ciudad de Piura, el día ___ de _____________ de 2026.</div>
+    </div>
+  </div>
+
+  <!-- Firmas -->
+  <div class="firmas">
+    <div class="firma-box">
+      <div class="firma-linea">
+        <div class="firma-nombre">___________________________</div>
+        <div class="firma-cargo">EMPLEADOR — ProAgro S.A.</div>
+        <div class="firma-cargo">Representante Legal</div>
+      </div>
+    </div>
+    <div class="firma-box">
+      <div class="firma-linea">
+        <div class="firma-nombre">{{ postulante.apellidos }} {{ postulante.nombres }}</div>
+        <div class="firma-cargo">DNI: {{ postulante.dni }}</div>
+        <div class="firma-cargo">TRABAJADOR</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Evaluar Postulante{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-6">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <a href="{{ url_for('medico_citas') }}" class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-arrow-left"></i></a>
+      <h5 class="fw-bold mb-0">Registrar evaluación médica</h5>
+    </div>
+
+    <!-- Datos del postulante -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-person-fill text-success"></i> Datos del postulante</h6>
+        <div class="row g-2 small">
+          <div class="col-12"><span class="text-muted">Nombre:</span><br>
+            <strong>{{ postulante.nombres }} {{ postulante.apellidos }}</strong></div>
+          <div class="col-6"><span class="text-muted">DNI:</span><br><strong>{{ postulante.dni }}</strong></div>
+          <div class="col-6"><span class="text-muted">Puesto:</span><br><strong>{{ postulante.puesto }}</strong></div>
+          <div class="col-6"><span class="text-muted">Fecha cita:</span><br>
+            <strong>{{ cita.dia.fecha.strftime('%d/%m/%Y') }}</strong></div>
+          <div class="col-6"><span class="text-muted">Bloque:</span><br>
+            <strong>{{ cita.etiqueta_bloque }}</strong></div>
+        </div>
+        <div class="mt-3">
+          <a href="{{ url_for('medico_ficha_postulante', pid=postulante.id, cita_id=cita.id) }}"
+             target="_blank" class="btn btn-sm btn-outline-success rounded-3">
+            <i class="bi bi-file-person-fill"></i> Ver ficha clínica completa
+          </a>
+        </div>
+        {% if postulante.declaracion %}
+        <div class="alert alert-light border rounded-3 mt-3 mb-0 small">
+          <div class="fw-semibold mb-1"><i class="bi bi-heart-pulse-fill text-danger"></i> Antecedentes declarados:</div>
+          {{ postulante.declaracion.condiciones_texto }}
+          <div class="text-muted mt-1">
+            Firmado: {{ postulante.declaracion.firmado_en.strftime('%d/%m/%Y %I:%M %p') }}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Formulario de evaluación -->
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-4"><i class="bi bi-clipboard-pulse-fill text-success"></i> Resultado de evaluación</h6>
+        <form method="POST" id="formEvaluacion">
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Resultado <span class="text-danger">*</span></label>
+            <div class="d-grid gap-2">
+              <div class="form-check option-card rounded-3 p-3 border">
+                <input class="form-check-input" type="radio" name="resultado" id="resApto" value="apto" required>
+                <label class="form-check-label w-100" for="resApto">
+                  <i class="bi bi-check-circle me-2"></i>
+                  <strong>Apto</strong> — El postulante está en condiciones para trabajar
+                </label>
+              </div>
+              <div class="form-check option-card rounded-3 p-3 border">
+                <input class="form-check-input" type="radio" name="resultado" id="resNoApto" value="no_apto">
+                <label class="form-check-label w-100" for="resNoApto">
+                  <i class="bi bi-x-circle me-2"></i>
+                  <strong>No apto</strong> — No puede incorporarse al trabajo
+                </label>
+              </div>
+              <div class="form-check option-card rounded-3 p-3 border">
+                <input class="form-check-input" type="radio" name="resultado" id="resNoAsistio" value="no_asistio">
+                <label class="form-check-label w-100" for="resNoAsistio">
+                  <i class="bi bi-person-dash me-2"></i>
+                  <strong>No asistió</strong> — El postulante no se presentó a la cita
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Observaciones médicas</label>
+            <textarea name="observacion" id="obsTextarea" class="form-control rounded-3" rows="3"
+                      maxlength="500"
+                      placeholder="Hallazgos clínicos, limitaciones físicas u otras notas relevantes..."></textarea>
+            <div class="d-flex justify-content-end">
+              <small class="text-muted mt-1"><span id="contadorObs">500</span> caracteres restantes</small>
+            </div>
+          </div>
+
+          <div class="alert alert-info rounded-3 small mb-4">
+            <i class="bi bi-info-circle-fill"></i>
+            <strong>Apto:</strong> confirma la vacante y genera el pase QR.<br>
+            <strong>No apto / No asistió:</strong> libera la vacante para el siguiente en lista de espera.
+          </div>
+
+          <div class="d-grid">
+            <button type="button" class="btn btn-success btn-lg rounded-3" id="btnGuardar">
+              <i class="bi bi-send-fill"></i> Guardar evaluación
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="modalConfirmar" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Confirmar evaluación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Confirmas registrar el siguiente resultado?</p>
+        <div class="bg-light rounded-3 p-3 small">
+          <div><span class="text-muted">Postulante:</span><br>
+            <strong>{{ postulante.nombres }} {{ postulante.apellidos }}</strong></div>
+          <div class="mt-2"><span class="text-muted">Resultado seleccionado:</span><br>
+            <strong id="resumenResultado">—</strong></div>
+        </div>
+        <p class="text-muted small mt-3 mb-0">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success rounded-3" id="btnConfirmar">
+          <i class="bi bi-check-circle-fill"></i> Confirmar y guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+// Contador de caracteres
+const obs = document.getElementById('obsTextarea');
+const contador = document.getElementById('contadorObs');
+obs.addEventListener('input', () => {
+  contador.textContent = 500 - obs.value.length;
+});
+
+// Modal de confirmación
+const etiquetas = { apto: 'Apto', no_apto: 'No apto', no_asistio: 'No asistió' };
+const modal = new bootstrap.Modal(document.getElementById('modalConfirmar'));
+
+document.getElementById('btnGuardar').addEventListener('click', () => {
+  const sel = document.querySelector('input[name="resultado"]:checked');
+  if (!sel) { alert('Selecciona un resultado antes de continuar.'); return; }
+  document.getElementById('resumenResultado').textContent = etiquetas[sel.value] || sel.value;
+  modal.show();
+});
+
+document.getElementById('btnConfirmar').addEventListener('click', () => {
+  modal.hide();
+  document.getElementById('formEvaluacion').submit();
+});
+</script>
+{% endblock %}

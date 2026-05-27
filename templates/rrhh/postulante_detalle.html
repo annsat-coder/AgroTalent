@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Detalle Postulante{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <a href="{{ url_for('rrhh_postulantes') }}" class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-arrow-left"></i></a>
+      <h5 class="fw-bold mb-0">Detalle del postulante</h5>
+    </div>
+
+    <!-- Datos personales -->
+    <div class="card border-0 shadow-sm rounded-4 mb-3">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h6 class="fw-bold mb-0"><i class="bi bi-person-fill text-success"></i> Datos personales</h6>
+          {% if postulante.es_extrabajador %}
+            <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> Ex-trabajador (Prioridad)</span>
+          {% endif %}
+        </div>
+        <div class="row g-3 small">
+          <div class="col-6"><span class="text-muted">Nombres:</span><br><strong>{{ postulante.nombres }} {{ postulante.apellidos }}</strong></div>
+          <div class="col-6"><span class="text-muted">DNI:</span><br><strong>{{ postulante.dni }}</strong></div>
+          <div class="col-6"><span class="text-muted">Celular:</span><br><strong>{{ postulante.usuario.celular }}</strong></div>
+          <div class="col-6"><span class="text-muted">Sexo:</span><br><strong>{{ postulante.sexo or '—' }}</strong></div>
+          <div class="col-6"><span class="text-muted">Fecha nacimiento:</span><br><strong>{{ postulante.fecha_nacimiento.strftime('%d/%m/%Y') if postulante.fecha_nacimiento else '—' }}</strong></div>
+          <div class="col-6"><span class="text-muted">Distrito:</span><br><strong>{{ postulante.distrito or '—' }}</strong></div>
+          <div class="col-6"><span class="text-muted">Grado instrucción:</span><br><strong>{{ postulante.grado_instruccion or '—' }}</strong></div>
+          <div class="col-6"><span class="text-muted">Puesto postulado:</span><br><strong>{{ postulante.puesto or '—' }}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado del proceso -->
+    <div class="card border-0 shadow-sm rounded-4 mb-3">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-activity text-success"></i> Estado del proceso</h6>
+        <div class="row g-3 small">
+          <div class="col-6"><span class="text-muted">Estado actual:</span><br>
+            <span class="badge bg-success fs-6">{{ postulante.estado_proceso.replace('_', ' ').title() }}</span>
+          </div>
+          <div class="col-6"><span class="text-muted">Estado vacante:</span><br>
+            {% if postulante.estado_vacante %}
+              <span class="badge bg-info text-dark">{{ postulante.estado_vacante.title() }}</span>
+            {% else %}<strong>—</strong>{% endif %}
+          </div>
+          <div class="col-6"><span class="text-muted">Fecha declaración:</span><br>
+            <strong>{{ postulante.fecha_hora_declaracion.strftime('%d/%m/%Y %H:%M') if postulante.fecha_hora_declaracion else '—' }}</strong>
+          </div>
+          <div class="col-6"><span class="text-muted">Fecha habilitación:</span><br>
+            <strong>{{ postulante.fecha_hora_habilitacion.strftime('%d/%m/%Y %H:%M') if postulante.fecha_hora_habilitacion else '—' }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Declaración de salud -->
+    {% if postulante.declaracion %}
+    <div class="card border-0 shadow-sm rounded-4 mb-3">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-heart-pulse-fill text-danger"></i> Declaración de salud</h6>
+        <div class="small">
+          <div><span class="text-muted">¿Tiene condición?</span> <strong>{{ 'Sí' if postulante.declaracion.tiene_condicion else 'No' }}</strong></div>
+          {% if postulante.declaracion.descripcion_condicion %}
+          <div class="mt-2"><span class="text-muted">Condición declarada:</span><br><strong>{{ postulante.declaracion.descripcion_condicion }}</strong></div>
+          {% endif %}
+          <div class="mt-2"><span class="text-muted">Firmada:</span> <strong>{{ postulante.declaracion.firmado_en.strftime('%d/%m/%Y %H:%M') }}</strong></div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Cita tópico -->
+    {% if postulante.cita %}
+    <div class="card border-0 shadow-sm rounded-4 mb-3">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-calendar-heart-fill text-info"></i> Cita médica</h6>
+        <div class="row g-2 small">
+          <div class="col-6"><span class="text-muted">Fecha:</span><br><strong>{{ postulante.cita.dia.fecha.strftime('%d/%m/%Y') if postulante.cita.dia else '—' }}</strong></div>
+          <div class="col-6"><span class="text-muted">Bloque:</span><br><strong>{{ postulante.cita.etiqueta_bloque }}</strong></div>
+          <div class="col-6"><span class="text-muted">Estado cita:</span><br><strong>{{ postulante.cita.estado_cita.replace('_', ' ').title() }}</strong></div>
+          {% if postulante.cita.resultado_medico %}
+          <div class="col-6"><span class="text-muted">Resultado:</span><br>
+            <span class="badge {% if postulante.cita.resultado_medico == 'apto' %}bg-success{% else %}bg-danger{% endif %}">
+              {{ postulante.cita.resultado_medico.title() }}
+            </span>
+          </div>
+          {% endif %}
+          {% if postulante.cita.observacion %}
+          <div class="col-12"><span class="text-muted">Observación médica:</span><br><strong>{{ postulante.cita.observacion }}</strong></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- QR -->
+    {% if postulante.pase_qr %}
+    <div class="card border-0 shadow-sm rounded-4 mb-3">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-qr-code text-success"></i> Pase QR</h6>
+        <div class="d-flex align-items-center gap-4">
+          <img src="{{ url_for('static', filename='qr/' ~ postulante.pase_qr.imagen_path) }}" style="width:100px" class="border rounded-3">
+          <div class="small">
+            <div><span class="text-muted">Estado:</span> <span class="badge {% if postulante.pase_qr.validado %}bg-primary{% else %}bg-secondary{% endif %}">{{ 'Validado' if postulante.pase_qr.validado else 'Sin validar' }}</span></div>
+            <div class="mt-1"><span class="text-muted">Generado:</span> <strong>{{ postulante.pase_qr.generado_en.strftime('%d/%m/%Y %H:%M') }}</strong></div>
+            {% if postulante.pase_qr.validado_en %}
+            <div class="mt-1"><span class="text-muted">Validado:</span> <strong>{{ postulante.pase_qr.validado_en.strftime('%d/%m/%Y %H:%M') }}</strong></div>
+            {% endif %}
+          </div>
+        </div>
+        {% if postulante.pase_qr.validado and postulante.estado_proceso == 'seleccionado' %}
+        <form method="POST" action="{{ url_for('rrhh_incorporar', pid=postulante.id) }}" class="mt-3">
+          <button type="submit" class="btn btn-success rounded-3" onclick="return confirm('¿Confirmas la incorporación de este postulante?')">
+            <i class="bi bi-check-circle-fill"></i> Confirmar incorporación
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Contrato -->
+    {% if postulante.estado_proceso in ['seleccionado', 'incorporado'] %}
+    <div class="card border-0 shadow-sm rounded-4 mb-3 border-start border-4 border-success">
+      <div class="card-body p-4 d-flex align-items-center justify-content-between">
+        <div>
+          <h6 class="fw-bold mb-1"><i class="bi bi-file-earmark-text-fill text-success"></i> Contrato de trabajo</h6>
+          <p class="text-muted small mb-0">Genera e imprime el contrato prellenado con los datos del postulante.</p>
+        </div>
+        <a href="{{ url_for('rrhh_contrato', pid=postulante.id) }}" target="_blank"
+           class="btn btn-success rounded-3 flex-shrink-0">
+          <i class="bi bi-printer-fill"></i> Imprimir contrato
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Historial -->
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-clock-history text-muted"></i> Historial de estados</h6>
+        {% if postulante.historial %}
+        <div class="timeline">
+          {% for h in postulante.historial | sort(attribute='registrado_en') %}
+          <div class="d-flex gap-3 mb-2 small">
+            <div class="text-muted flex-shrink-0" style="min-width:120px">{{ h.registrado_en.strftime('%d/%m/%Y %H:%M') }}</div>
+            <div>→ <strong>{{ h.estado_nuevo.replace('_', ' ').title() }}</strong>
+              {% if h.descripcion %}<span class="text-muted"> · {{ h.descripcion }}</span>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+          <p class="text-muted small mb-0">Sin historial.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

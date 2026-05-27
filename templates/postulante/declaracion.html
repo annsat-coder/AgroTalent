@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Declaración Jurada{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-7">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <a href="{{ url_for('postulante_dashboard') }}" class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-arrow-left"></i></a>
+      <h5 class="fw-bold mb-0">Declaración Jurada de Salud</h5>
+    </div>
+
+    {% if ya_firmada %}
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4 text-center">
+        <i class="bi bi-file-earmark-check-fill text-success" style="font-size:3rem"></i>
+        <h5 class="fw-bold mt-3">Declaración ya registrada</h5>
+        <p class="text-muted small">Firmada el {{ declaracion.firmado_en.strftime('%d/%m/%Y %I:%M %p') }}</p>
+        {% if declaracion.tiene_condicion %}
+          <div class="alert alert-info rounded-3 text-start mt-3">
+            <i class="bi bi-info-circle-fill"></i>
+            <strong>Antecedentes declarados:</strong> {{ declaracion.condiciones_texto }}<br>
+            Revisa el estado de tu cita médica en el panel principal.
+          </div>
+        {% else %}
+          <div class="alert alert-success rounded-3 text-start mt-3">
+            <i class="bi bi-check-circle-fill"></i> No declaraste antecedentes médicos de riesgo.
+          </div>
+        {% endif %}
+        <a href="{{ url_for('postulante_dashboard') }}" class="btn btn-success mt-2 rounded-3">
+          <i class="bi bi-house-fill"></i> Volver a mi panel
+        </a>
+      </div>
+    </div>
+
+    {% else %}
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <div class="alert alert-warning rounded-3 mb-4 small">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <strong>Importante:</strong> Esta declaración tiene carácter de documento oficial. Responde con honestidad y responsabilidad.
+        </div>
+
+        <p class="fw-semibold mb-1">
+          Yo, <strong>{{ postulante.nombres }} {{ postulante.apellidos }}</strong>,
+          identificado/a con DNI <strong>{{ postulante.dni }}</strong>, declaro bajo juramento:
+        </p>
+
+        <div class="bg-light rounded-3 p-3 mb-4 small">
+          <ul class="mb-0 ps-3">
+            <li>La información que proporciono es verídica, completa y de mi entera responsabilidad.</li>
+            <li>Entiendo que proporcionar información falsa puede resultar en mi exclusión del proceso.</li>
+          </ul>
+        </div>
+
+        <form method="POST">
+          <h6 class="fw-bold mb-3"><i class="bi bi-heart-pulse text-danger"></i> Antecedentes médicos</h6>
+          <p class="text-muted small mb-3">Marca <strong>Sí</strong> en los antecedentes que presentes actualmente:</p>
+
+          <div class="row g-2 mb-4">
+            {% set antecedentes = [
+              ('mayor_65',       'Mayor de 65 años'),
+              ('hipertension',   'Hipertensión arterial'),
+              ('diabetes',       'Diabetes mellitus'),
+              ('cardiovascular', 'Enfermedad cardiovascular'),
+              ('pulmonar_cronica','Enfermedad pulmonar crónica'),
+              ('cancer',         'Cáncer'),
+              ('asma',           'Asma'),
+              ('enfisema',       'Enfisema'),
+              ('epoc',           'Enfermedad obstructiva pulmonar (EPOC)'),
+              ('obesidad',       'Obesidad'),
+              ('gestacion',      'Gestación'),
+            ] %}
+            {% for campo, etiqueta in antecedentes %}
+            <div class="col-12">
+              <div class="d-flex align-items-center justify-content-between border rounded-3 px-3 py-2">
+                <span class="small fw-semibold">{{ etiqueta }}</span>
+                <div class="d-flex gap-3">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="{{ campo }}" id="{{ campo }}_si" value="si">
+                    <label class="form-check-label small" for="{{ campo }}_si">Sí</label>
+                  </div>
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="{{ campo }}" id="{{ campo }}_no" value="no">
+                    <label class="form-check-label small" for="{{ campo }}_no">No</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" id="acepto" required>
+            <label class="form-check-label small" for="acepto">
+              Confirmo que la información proporcionada es verídica y acepto los términos de esta declaración jurada.
+            </label>
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-pen-fill"></i> Firmar y enviar declaración
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

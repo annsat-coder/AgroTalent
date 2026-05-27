@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Dashboard RR.HH.{% endblock %}
+{% block extra_css %}
+<style>
+.conv-banner {
+  background: #1a6e2e;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  color: #fff;
+  margin-bottom: 1.25rem;
+}
+.conv-banner .label { font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; opacity:.6; margin-bottom:.2rem; }
+.kpi-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:10px; margin-bottom:1.25rem; }
+@media(min-width:768px){ .kpi-grid { grid-template-columns: repeat(4,1fr); } }
+.kpi-card {
+  background:#fff; border-radius:10px; border:.5px solid rgba(0,0,0,.09);
+  padding:1rem 1.25rem;
+}
+.kpi-card.alerta { border-left:3px solid #e05c00; }
+.kpi-val { font-size:2rem; font-weight:600; line-height:1; }
+.kpi-label { font-size:.78rem; color:#6b7280; margin-top:.2rem; }
+.kpi-sub { font-size:.7rem; color:#9ca3af; margin-top:.1rem; }
+.kpi-val.alert-color { color:#c04c00; }
+
+.vacantes-card { background:#fff; border-radius:10px; border:.5px solid rgba(0,0,0,.09); padding:1rem 1.25rem; margin-bottom:1.25rem; }
+.puesto-row { display:flex; align-items:center; gap:.75rem; padding:.35rem 0; }
+.puesto-row + .puesto-row { border-top:.5px solid rgba(0,0,0,.06); }
+.puesto-name { width:130px; flex-shrink:0; font-size:.85rem; font-weight:500; }
+.puesto-bar-wrap { flex:1; background:#e5e7eb; border-radius:99px; height:7px; overflow:hidden; }
+.puesto-bar { height:100%; border-radius:99px; }
+.puesto-count { font-size:.78rem; color:#6b7280; white-space:nowrap; min-width:80px; text-align:right; }
+.section-title { font-size:.7rem; text-transform:uppercase; letter-spacing:.07em; color:#9ca3af; font-weight:500; margin-bottom:.65rem; }
+.no-conv { background:#fffbeb; border:.5px solid #fbbf24; border-radius:10px; padding:1rem 1.25rem; margin-bottom:1.25rem; font-size:.88rem; }
+</style>
+{% endblock %}
+{% block content %}
+
+{% if not conv %}
+<div class="no-conv">
+  <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+  <strong>Sin convocatoria activa.</strong> Los postulantes no pueden avanzar.
+  <a href="{{ url_for('rrhh_convocatoria') }}" class="ms-2 fw-semibold text-success">Crear convocatoria →</a>
+</div>
+{% endif %}
+
+{% if conv %}
+<!-- Banner convocatoria -->
+<div class="conv-banner">
+  <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+    <div>
+      <div class="label">Centro de control operativo</div>
+      <div class="fw-bold mb-1" style="font-size:1.3rem">{{ conv.nombre }}</div>
+      <div class="d-flex flex-wrap gap-3" style="font-size:.82rem;opacity:.85">
+        <span><i class="bi bi-calendar-event me-1"></i>Apertura: {{ conv.fecha_apertura.strftime('%d/%m/%Y %H:%M') }}</span>
+        <span><i class="bi bi-calendar-x me-1"></i>Cierre: {{ conv.fecha_cierre.strftime('%d/%m/%Y %H:%M') }}</span>
+        <span><i class="bi bi-geo-alt me-1"></i>{{ conv.lugar_presentacion }}</span>
+      </div>
+    </div>
+    <div class="text-end">
+      <span style="background:rgba(255,255,255,.18);color:#fff;font-size:.72rem;padding:.25rem .7rem;border-radius:99px;">● Abierta</span>
+      <div class="mt-2" style="font-size:.78rem;opacity:.7">Vacantes totales</div>
+      <div style="font-size:2rem;font-weight:600;line-height:1">{{ conv.total_vacantes }}</div>
+      <div style="font-size:.8rem;opacity:.75">{{ conv.vacantes_disponibles }} disponibles · {{ conv.vacantes_ocupadas }} ocupadas</div>
+    </div>
+  </div>
+</div>
+
+<!-- 4 KPIs operativos -->
+<div class="section-title">Alertas operativas</div>
+<div class="kpi-grid">
+  <div class="kpi-card {% if pendientes_topico > 0 %}alerta{% endif %}">
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <i class="bi bi-hospital-fill {% if pendientes_topico > 0 %}text-warning{% else %}text-muted{% endif %}" style="font-size:1.3rem"></i>
+      <div class="kpi-val {% if pendientes_topico > 0 %}alert-color{% endif %}">{{ pendientes_topico }}</div>
+    </div>
+    <div class="kpi-label">Pendientes de tópico</div>
+    <div class="kpi-sub">Requieren atención médica</div>
+  </div>
+  <div class="kpi-card">
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <i class="bi bi-list-ol text-warning" style="font-size:1.3rem"></i>
+      <div class="kpi-val">{{ lista_espera }}</div>
+    </div>
+    <div class="kpi-label">Lista de espera</div>
+    <div class="kpi-sub">Postulantes sin cupo asignado</div>
+  </div>
+  <div class="kpi-card {% if vacantes_liberadas > 0 %}alerta{% endif %}">
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <i class="bi bi-unlock-fill {% if vacantes_liberadas > 0 %}text-danger{% else %}text-muted{% endif %}" style="font-size:1.3rem"></i>
+      <div class="kpi-val {% if vacantes_liberadas > 0 %}alert-color{% endif %}">{{ vacantes_liberadas }}</div>
+    </div>
+    <div class="kpi-label">Vacantes liberadas</div>
+    <div class="kpi-sub">Por no apto o no asistencia</div>
+  </div>
+  <div class="kpi-card">
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <i class="bi bi-star-fill text-success" style="font-size:1.3rem"></i>
+      <div class="kpi-val">{{ incorporados }}</div>
+    </div>
+    <div class="kpi-label">Incorporaciones</div>
+    <div class="kpi-sub">Firmas confirmadas</div>
+  </div>
+</div>
+
+<!-- Vacantes por puesto -->
+{% if puestos %}
+<div class="section-title">Estado de vacantes por puesto</div>
+<div class="vacantes-card">
+  <div class="d-flex justify-content-between small text-muted mb-3">
+    <span class="fw-semibold text-dark"><i class="bi bi-table text-success me-1"></i> Vacantes por puesto</span>
+    <span>{{ conv.vacantes_ocupadas }}/{{ conv.total_vacantes }} ocupadas</span>
+  </div>
+  {% for p in puestos %}
+  {% set pct = ((p.vacantes_ocupadas / p.vacantes_total) * 100) | int if p.vacantes_total > 0 else 0 %}
+  {% set bar_color = '#dc2626' if pct >= 90 else ('#ca8a04' if pct >= 70 else '#16a34a') %}
+  <div class="puesto-row">
+    <div class="puesto-name">{{ p.nombre_puesto }}</div>
+    <div class="puesto-bar-wrap">
+      <div class="puesto-bar" style="width:{{ pct }}%;background:{{ bar_color }}"></div>
+    </div>
+    <div class="puesto-count">
+      <strong>{{ p.vacantes_ocupadas }}/{{ p.vacantes_total }}</strong>
+      &nbsp;·&nbsp;
+      <span style="color:{% if p.vacantes_disponibles > 0 %}#16a34a{% else %}#dc2626{% endif %}">
+        {{ p.vacantes_disponibles }} libre{{ 's' if p.vacantes_disponibles != 1 else '' }}
+      </span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endif %}
+
+{% endblock %}

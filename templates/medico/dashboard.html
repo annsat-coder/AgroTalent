@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Médico{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h5 class="fw-bold mb-0">Panel Médico — Tópico</h5>
+    <small class="text-muted">Gestión de evaluaciones médicas</small>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  {% macro kpi(titulo, valor, icono, color) %}
+  <div class="col-6 col-md-4">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body d-flex align-items-center gap-3 p-3">
+        <div class="rounded-3 d-flex align-items-center justify-content-center bg-{{ color }} bg-opacity-10 flex-shrink-0" style="width:48px;height:48px">
+          <i class="bi {{ icono }} text-{{ color }}" style="font-size:1.4rem"></i>
+        </div>
+        <div>
+          <div class="fw-bold fs-4 lh-1">{{ valor }}</div>
+          <div class="text-muted small">{{ titulo }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endmacro %}
+  {{ kpi('Citas hoy', citas_hoy, 'bi-calendar-check-fill', 'info') }}
+  {{ kpi('Pendientes total', pendientes, 'bi-hourglass-split', 'warning') }}
+  {{ kpi('Atendidas hoy', atendidas_hoy, 'bi-check-circle-fill', 'success') }}
+</div>
+
+<div class="d-grid">
+  <a href="{{ url_for('medico_citas') }}" class="btn btn-success btn-lg rounded-3">
+    <i class="bi bi-calendar-week-fill"></i> Ver agenda de citas
+  </a>
+</div>
+{% endblock %}

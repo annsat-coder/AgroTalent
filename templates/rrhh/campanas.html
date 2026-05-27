@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Campañas{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-12 col-lg-5 mb-4">
+    <h5 class="fw-bold mb-4">Crear nueva campaña</h5>
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <div class="alert alert-warning rounded-3 small mb-4">
+          <i class="bi bi-exclamation-triangle-fill"></i> Crear una nueva campaña desactivará la campaña activa actual.
+        </div>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre de la campaña <span class="text-danger">*</span></label>
+            <input type="text" name="nombre" class="form-control rounded-3" placeholder="Ej: Campaña Cosecha 2026-II" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Total de vacantes <span class="text-danger">*</span></label>
+            <input type="number" name="vacantes_total" class="form-control rounded-3" min="1" max="999" value="20" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Fecha de ingreso <span class="text-danger">*</span></label>
+            <input type="date" name="fecha_ingreso" class="form-control rounded-3" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Hora de presentación <span class="text-danger">*</span></label>
+            <input type="time" name="hora_presentacion" class="form-control rounded-3" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Lugar de presentación <span class="text-danger">*</span></label>
+            <input type="text" name="lugar_presentacion" class="form-control rounded-3" placeholder="Fundo ProAgro..." required>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-megaphone-fill"></i> Crear campaña
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-7">
+    <h5 class="fw-bold mb-4">Historial de campañas</h5>
+    <div class="d-grid gap-3">
+      {% for c in campanas %}
+      <div class="card border-0 shadow-sm rounded-4 {% if c.activa %}border-start border-4 border-success{% endif %}">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <h6 class="fw-bold mb-1">{{ c.nombre }}
+                {% if c.activa %}<span class="badge bg-success ms-2">Activa</span>{% endif %}
+              </h6>
+              <div class="row g-2 small text-muted mt-1">
+                <div class="col-auto"><i class="bi bi-calendar3"></i> {{ c.fecha_ingreso.strftime('%d/%m/%Y') }}</div>
+                <div class="col-auto"><i class="bi bi-clock"></i> {{ c.hora_presentacion }}</div>
+                <div class="col-12"><i class="bi bi-geo-alt"></i> {{ c.lugar_presentacion }}</div>
+              </div>
+            </div>
+            <div class="text-end">
+              <div class="fw-bold">{{ c.vacantes_ocupadas }}/{{ c.vacantes_total }}</div>
+              <div class="text-muted small">vacantes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-inbox" style="font-size:2rem;opacity:.3"></i>
+        <p class="mt-2">No hay campañas creadas.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

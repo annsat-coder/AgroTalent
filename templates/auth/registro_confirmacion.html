@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}¡Cuenta creada!{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-4">
+  <div class="col-12 col-md-6 col-lg-5">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-5 text-center">
+
+        <div class="mb-4">
+          <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3"
+               style="width:80px;height:80px">
+            <i class="bi bi-check-circle-fill text-success" style="font-size:2.8rem"></i>
+          </div>
+          <h4 class="fw-bold">¡Cuenta creada con éxito!</h4>
+          <p class="text-muted">Tu registro en el sistema de ProAgro ha sido completado.</p>
+        </div>
+
+        <div class="bg-light rounded-3 p-3 text-start mb-4">
+          <div class="small text-muted mb-1">DNI registrado</div>
+          <div class="fw-bold fs-5">{{ current_user.dni }}</div>
+          <div class="small text-muted mt-2 mb-1">Celular</div>
+          <div class="fw-bold">{{ current_user.celular }}</div>
+        </div>
+
+        <div class="alert alert-warning rounded-3 text-start small mb-4">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <strong>Próximo paso:</strong> Completa tus datos personales para continuar con el proceso de postulación.
+        </div>
+
+        <div class="d-grid">
+          <a href="{{ url_for('postulante_datos') }}" class="btn btn-success btn-lg rounded-3">
+            <i class="bi bi-arrow-right-circle-fill"></i> Completar mis datos
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

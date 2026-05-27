@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Mi cuenta{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-6 col-lg-5">
+    <h5 class="fw-bold mb-4"><i class="bi bi-person-circle text-success"></i> Mi cuenta</h5>
+
+    <!-- Datos de la cuenta -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3">Información de la cuenta</h6>
+        <div class="row g-2 small">
+          <div class="col-6"><span class="text-muted">Nombre:</span><br>
+            <strong>{{ current_user.nombres }} {{ current_user.apellidos }}</strong></div>
+          <div class="col-6"><span class="text-muted">DNI:</span><br>
+            <strong>{{ current_user.dni }}</strong></div>
+          <div class="col-12"><span class="text-muted">Correo institucional:</span><br>
+            <strong>{{ current_user.correo or '—' }}</strong></div>
+          <div class="col-6"><span class="text-muted">Cargo:</span><br>
+            <strong>{{ current_user.cargo or '—' }}</strong></div>
+          <div class="col-6"><span class="text-muted">Rol:</span><br>
+            <strong>{{ 'Jefe RR.HH.' if current_user.es_jefe else ('RR.HH.' if current_user.rol == 'rrhh' else 'Médico') }}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cambiar contraseña -->
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        {% if current_user.password_temporal %}
+        <div class="alert alert-warning rounded-3 small mb-3">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <strong>Debes cambiar tu contraseña temporal</strong> antes de continuar usando el sistema.
+        </div>
+        {% endif %}
+        <h6 class="fw-bold mb-3">Cambiar contraseña</h6>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Contraseña actual <span class="text-danger">*</span></label>
+            <input type="password" name="password_actual" class="form-control rounded-3"
+                   placeholder="Ingresa tu contraseña actual" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nueva contraseña <span class="text-danger">*</span></label>
+            <input type="password" name="password_nueva" class="form-control rounded-3"
+                   placeholder="Mínimo 6 caracteres" minlength="6" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Confirmar nueva contraseña <span class="text-danger">*</span></label>
+            <input type="password" name="password_confirmar" class="form-control rounded-3"
+                   placeholder="Repite la nueva contraseña" required>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-lock-fill"></i> Cambiar contraseña
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

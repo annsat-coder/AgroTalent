@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Mi Proceso{% endblock %}
+{% block content %}
+{% set estado = postulante.estado_proceso %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8">
+
+    <!-- Encabezado -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <div class="d-flex align-items-center justify-content-center rounded-circle bg-success text-white flex-shrink-0"
+           style="width:52px;height:52px;font-size:1.5rem">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <div>
+        <h5 class="fw-bold mb-0">{{ postulante.nombres or 'Bienvenido/a' }} {{ postulante.apellidos or '' }}</h5>
+        <small class="text-muted">DNI: {{ current_user.dni }}</small>
+      </div>
+      <div class="ms-auto">
+        {% if estado == 'seleccionado' %}
+          <span class="badge bg-success fs-6 px-3 py-2 rounded-pill"><i class="bi bi-check-circle-fill"></i> Seleccionado</span>
+        {% elif estado == 'incorporado' %}
+          <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill"><i class="bi bi-star-fill"></i> Incorporado</span>
+        {% elif estado == 'no_apto' %}
+          <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill"><i class="bi bi-x-circle-fill"></i> No apto</span>
+        {% elif estado == 'no_se_presento' %}
+          <span class="badge bg-secondary fs-6 px-3 py-2 rounded-pill"><i class="bi bi-dash-circle-fill"></i> No se presentó</span>
+        {% elif estado == 'lista_espera' %}
+          <span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill"><i class="bi bi-hourglass"></i> Lista de espera</span>
+        {% elif estado == 'cita_programada' %}
+          <span class="badge bg-info text-dark fs-6 px-3 py-2 rounded-pill"><i class="bi bi-calendar-check"></i> Cita programada</span>
+        {% else %}
+          <span class="badge bg-secondary fs-6 px-3 py-2 rounded-pill"><i class="bi bi-arrow-clockwise"></i> En proceso</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Pasos -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-header border-0 bg-white rounded-top-4 pt-3 pb-0 px-4">
+        <h6 class="fw-bold text-muted mb-0"><i class="bi bi-list-check text-success"></i> Mis pasos</h6>
+      </div>
+      <div class="card-body px-4 pb-4">
+
+        {% set paso1_ok = postulante.datos_completos %}
+        {% set paso2_ok = estado not in ['registrado', 'en_proceso'] or (estado == 'en_proceso' and postulante.inducciones | selectattr('aprobado') | list | length == 4) %}
+        {% set paso3_ok = postulante.declaracion is not none %}
+        {% set paso4_ok = postulante.pase_qr is not none %}
+
+        <!-- Paso 1: Datos personales -->
+        <div class="d-flex gap-3 mb-3 align-items-start pt-2">
+          <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle fw-bold
+            {% if paso1_ok %}bg-success text-white{% elif not paso1_ok %}bg-warning text-dark{% else %}bg-light text-muted{% endif %}"
+            style="width:38px;height:38px">
+            {% if paso1_ok %}<i class="bi bi-check-lg"></i>{% else %}1{% endif %}
+          </div>
+          <div class="flex-grow-1">
+            <div class="fw-semibold">Datos personales</div>
+            <div class="text-muted small">Completa tu información básica.</div>
+            {% if not paso1_ok %}
+            <a href="{{ url_for('postulante_datos') }}" class="btn btn-success btn-sm mt-2 px-3 rounded-3">
+              <i class="bi bi-arrow-right-circle"></i> Completar datos
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <hr class="my-2">
+
+        <!-- Paso 2: Inducciones -->
+        <div class="d-flex gap-3 mb-3 align-items-start pt-2 {% if not paso1_ok %}opacity-50{% endif %}">
+          <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle fw-bold
+            {% if paso2_ok %}bg-success text-white{% elif paso1_ok %}bg-warning text-dark{% else %}bg-light text-muted{% endif %}"
+            style="width:38px;height:38px">
+            {% if paso2_ok %}<i class="bi bi-check-lg"></i>{% else %}2{% endif %}
+          </div>
+          <div class="flex-grow-1">
+            <div class="fw-semibold">Inducciones virtuales</div>
+            <div class="text-muted small">Realiza las 4 inducciones obligatorias.</div>
+            {% if paso1_ok and not paso2_ok %}
+            <a href="{{ url_for('postulante_inducciones') }}" class="btn btn-success btn-sm mt-2 px-3 rounded-3">
+              <i class="bi bi-arrow-right-circle"></i> Ir a inducciones
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <hr class="my-2">
+
+        <!-- Paso 3: Declaración -->
+        <div class="d-flex gap-3 mb-3 align-items-start pt-2 {% if not paso2_ok %}opacity-50{% endif %}">
+          <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle fw-bold
+            {% if paso3_ok %}bg-success text-white{% elif paso2_ok %}bg-warning text-dark{% else %}bg-light text-muted{% endif %}"
+            style="width:38px;height:38px">
+            {% if paso3_ok %}<i class="bi bi-check-lg"></i>{% else %}3{% endif %}
+          </div>
+          <div class="flex-grow-1">
+            <div class="fw-semibold">Declaración jurada de salud</div>
+            <div class="text-muted small">Firma tu declaración de salud.</div>
+            {% if paso2_ok and not paso3_ok %}
+            <a href="{{ url_for('postulante_declaracion') }}" class="btn btn-success btn-sm mt-2 px-3 rounded-3">
+              <i class="bi bi-arrow-right-circle"></i> Firmar declaración
+            </a>
+            {% endif %}
+            {% if estado == 'cita_programada' and postulante.cita %}
+            <div class="alert alert-info rounded-3 small mt-2 mb-0 py-2">
+              <i class="bi bi-calendar-check-fill"></i>
+              Tienes cita médica el <strong>{{ postulante.cita.dia.fecha.strftime('%d/%m/%Y') }}</strong>
+              — {{ postulante.cita.etiqueta_bloque }}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <hr class="my-2">
+
+        <!-- Paso 4: Pase QR -->
+        <div class="d-flex gap-3 align-items-start pt-2 {% if not paso3_ok %}opacity-50{% endif %}">
+          <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle fw-bold
+            {% if paso4_ok %}bg-success text-white{% else %}bg-light text-muted{% endif %}"
+            style="width:38px;height:38px">
+            {% if paso4_ok %}<i class="bi bi-check-lg"></i>{% else %}4{% endif %}
+          </div>
+          <div class="flex-grow-1">
+            <div class="fw-semibold">Pase QR</div>
+            {% if paso4_ok %}
+            <div class="text-muted small">Tu pase está listo. Preséntalo en el fundo.</div>
+            <a href="{{ url_for('postulante_qr') }}" class="btn btn-success btn-sm mt-2 px-3 rounded-3">
+              <i class="bi bi-qr-code"></i> Ver mi pase QR
+            </a>
+            {% else %}
+            <div class="text-muted small">Se generará cuando tengas una vacante confirmada.</div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Info campaña activa -->
+    {% if conv %}
+    <div class="card border-0 shadow-sm rounded-4 border-start border-4 border-success">
+      <div class="card-body px-4 py-3">
+        <h6 class="fw-bold mb-2"><i class="bi bi-megaphone-fill text-success"></i> Convocatoria activa</h6>
+        <div class="row g-2 small">
+          <div class="col-12"><span class="text-muted">Campaña:</span><br><strong>{{ conv.nombre }}</strong></div>
+          <div class="col-6"><span class="text-muted">Fecha de presentación:</span><br>
+            <strong>{{ conv.fecha_presentacion.strftime('%d/%m/%Y') }}</strong></div>
+          <div class="col-6"><span class="text-muted">Hora:</span><br><strong>{{ conv.hora_presentacion }}</strong></div>
+          <div class="col-12"><span class="text-muted">Lugar:</span><br><strong>{{ conv.lugar_presentacion }}</strong></div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

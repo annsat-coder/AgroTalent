@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Ficha Clínica — {{ postulante.nombres }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-7">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <a href="{{ url_for('medico_evaluar', cita_id=cita_id) }}" class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-arrow-left"></i></a>
+      <h5 class="fw-bold mb-0">Ficha clínica del postulante</h5>
+    </div>
+
+    <!-- Datos personales -->
+    <div class="card border-0 shadow-sm rounded-4 mb-3">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-person-fill text-success"></i> Datos personales</h6>
+        <div class="row g-2 small">
+          <div class="col-12"><span class="text-muted">Nombre completo:</span><br>
+            <strong>{{ postulante.nombres }} {{ postulante.apellidos }}</strong></div>
+          <div class="col-6"><span class="text-muted">DNI:</span><br><strong>{{ postulante.dni }}</strong></div>
+          <div class="col-6"><span class="text-muted">Sexo:</span><br><strong>{{ postulante.sexo or '—' }}</strong></div>
+          <div class="col-6"><span class="text-muted">Fecha de nacimiento:</span><br>
+            <strong>{{ postulante.fecha_nacimiento.strftime('%d/%m/%Y') if postulante.fecha_nacimiento else '—' }}</strong></div>
+          <div class="col-6"><span class="text-muted">Puesto:</span><br><strong>{{ postulante.puesto or '—' }}</strong></div>
+          <div class="col-6"><span class="text-muted">Distrito:</span><br><strong>{{ postulante.distrito or '—' }}</strong></div>
+          <div class="col-6"><span class="text-muted">Celular:</span><br><strong>{{ postulante.usuario.celular }}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Declaración jurada de salud -->
+    <div class="card border-0 shadow-sm rounded-4 mb-3">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-heart-pulse-fill text-danger"></i> Declaración jurada de salud</h6>
+        {% if postulante.declaracion %}
+          <div class="small text-muted mb-3">
+            Firmada el {{ postulante.declaracion.firmado_en.strftime('%d/%m/%Y %I:%M %p') }}
+          </div>
+          {% set decl = postulante.declaracion %}
+          {% set antecedentes = [
+            ('Mayor de 65 años', decl.mayor_65),
+            ('Hipertensión arterial', decl.hipertension),
+            ('Diabetes mellitus', decl.diabetes),
+            ('Enfermedad cardiovascular', decl.cardiovascular),
+            ('Enfermedad pulmonar crónica', decl.pulmonar_cronica),
+            ('Cáncer', decl.cancer),
+            ('Asma', decl.asma),
+            ('Enfisema', decl.enfisema),
+            ('EPOC', decl.epoc),
+            ('Obesidad', decl.obesidad),
+            ('Gestación', decl.gestacion),
+          ] %}
+          <div class="d-grid gap-1">
+            {% for nombre, valor in antecedentes %}
+            <div class="d-flex align-items-center justify-content-between px-3 py-2 rounded-3
+              {% if valor %}bg-danger bg-opacity-10 border border-danger border-opacity-25
+              {% else %}bg-light{% endif %}">
+              <span class="small {% if valor %}fw-semibold text-danger{% else %}text-muted{% endif %}">{{ nombre }}</span>
+              <span class="badge {% if valor %}bg-danger{% else %}bg-light text-muted border{% endif %}">
+                {{ 'Sí' if valor else 'No' }}
+              </span>
+            </div>
+            {% endfor %}
+          </div>
+          {% if not decl.tiene_condicion %}
+          <div class="alert alert-success rounded-3 mt-3 mb-0 small">
+            <i class="bi bi-check-circle-fill"></i> El postulante no declaró antecedentes médicos de riesgo.
+          </div>
+          {% endif %}
+        {% else %}
+          <p class="text-muted small mb-0">No hay declaración de salud registrada.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="d-grid">
+      <a href="{{ url_for('medico_evaluar', cita_id=cita_id) }}" class="btn btn-success rounded-3">
+        <i class="bi bi-clipboard-pulse-fill"></i> Volver a registrar evaluación
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
