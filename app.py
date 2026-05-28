@@ -10,7 +10,10 @@ from seed import seed_db
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'proagro-secret-2026')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///proagro.db')
+db_url = os.environ.get('DATABASE_URL', 'sqlite:///proagro.db')
+if db_url.startswith('postgres://'):
+    db_url = db_url.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['QR_FOLDER'] = os.path.join(app.root_path, 'static', 'qr')
 os.makedirs(app.config['QR_FOLDER'], exist_ok=True)
