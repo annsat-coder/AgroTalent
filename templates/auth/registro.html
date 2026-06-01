@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Crear cuenta{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-3">
+  <div class="col-12 col-md-6 col-lg-5">
+    <div class="text-center mb-4">
+      <i class="bi bi-person-plus-fill text-success" style="font-size:2.5rem"></i>
+      <h4 class="fw-bold mt-2">Crear cuenta</h4>
+      <p class="text-muted small">Ingresa tus datos para registrarte como postulante</p>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <form method="POST">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">DNI <span class="text-danger">*</span></label>
+              <input type="text" name="dni" class="form-control form-control-lg rounded-3"
+                     placeholder="8 dígitos" maxlength="8" pattern="\d{8}" required autofocus>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label fw-semibold">Nombres <span class="text-danger">*</span></label>
+              <input type="text" name="nombres" class="form-control form-control-lg rounded-3"
+                     placeholder="Ej: María Elena" required>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label fw-semibold">Apellidos <span class="text-danger">*</span></label>
+              <input type="text" name="apellidos" class="form-control form-control-lg rounded-3"
+                     placeholder="Ej: García López" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Celular <span class="text-danger">*</span></label>
+              <input type="tel" name="celular" class="form-control form-control-lg rounded-3"
+                     placeholder="9XXXXXXXX" maxlength="15" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Contraseña <span class="text-danger">*</span></label>
+              <input type="password" name="password" class="form-control form-control-lg rounded-3"
+                     placeholder="Mínimo 6 caracteres" minlength="6" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Confirmar contraseña <span class="text-danger">*</span></label>
+              <input type="password" name="confirmar" class="form-control form-control-lg rounded-3"
+                     placeholder="Repite tu contraseña" required>
+            </div>
+          </div>
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-person-check-fill"></i> Crear cuenta
+            </button>
+          </div>
+        </form>
+        <hr class="my-3">
+        <div class="text-center small">
+          ¿Ya tienes cuenta? <a href="{{ url_for('login') }}" class="text-success fw-semibold">Inicia sesión</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

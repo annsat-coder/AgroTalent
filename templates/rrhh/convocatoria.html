@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Convocatoria{% endblock %}
+{% block content %}
+
+{% set TODOS_PUESTOS = ['Siembra','Guiado','Poda','Desbrote','Acomodo','Desoje','Ajuste','Descole','Raleo','Cosecha'] %}
+
+<div class="row g-4">
+
+  <!-- Columna izquierda: formulario crear/editar -->
+  <div class="col-12 col-lg-6">
+    <h5 class="fw-bold mb-4">
+      {% if conv %}Editar convocatoria activa{% else %}Nueva convocatoria{% endif %}
+    </h5>
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <form method="POST">
+          <input type="hidden" name="accion" value="{% if conv %}editar{% else %}crear{% endif %}">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
+              <input type="text" name="nombre" class="form-control rounded-3"
+                     value="{{ conv.nombre if conv else '' }}" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Fecha apertura <span class="text-danger">*</span></label>
+              <input type="datetime-local" name="fecha_apertura" class="form-control rounded-3"
+                     value="{{ conv.fecha_apertura.strftime('%Y-%m-%dT%H:%M') if conv else '' }}" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Fecha cierre <span class="text-danger">*</span></label>
+              <input type="datetime-local" name="fecha_cierre" class="form-control rounded-3"
+                     value="{{ conv.fecha_cierre.strftime('%Y-%m-%dT%H:%M') if conv else '' }}" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Fecha presentación <span class="text-danger">*</span></label>
+              <input type="date" name="fecha_presentacion" class="form-control rounded-3"
+                     value="{{ conv.fecha_presentacion.strftime('%Y-%m-%d') if conv else '' }}" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Hora de firma de contrato <span class="text-danger">*</span></label>
+              <input type="time" name="hora_presentacion" class="form-control rounded-3"
+                     value="{{ conv.hora_presentacion if conv else '' }}" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Vacantes por puesto</label>
+              <div class="row g-2 mt-1">
+                {% for nombre in TODOS_PUESTOS %}
+                  {% set puesto_actual = conv.puestos | selectattr('nombre_puesto','equalto',nombre) | first if conv else None %}
+                  <div class="col-6 col-md-4">
+                    <label class="form-label small mb-1">{{ nombre }}</label>
+                    <input type="number" name="vacantes_{{ nombre }}"
+                           class="form-control rounded-3 form-control-sm"
+                           min="0" value="{{ puesto_actual.vacantes_total if puesto_actual else 0 }}">
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-check-circle-fill"></i>
+              {% if conv %}Guardar cambios{% else %}Crear convocatoria{% endif %}
+            </button>
+          </div>
+        </form>
+
+        {% if conv %}
+        <hr class="my-3">
+        <form method="POST">
+          <input type="hidden" name="accion" value="cerrar">
+          <button type="submit" class="btn btn-outline-danger btn-sm rounded-3 w-100"
+                  onclick="return confirm('¿Confirmas el cierre de la convocatoria? Esta acción no se puede deshacer.')">
+            <i class="bi bi-x-circle-fill"></i> Cerrar convocatoria
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Columna derecha: historial -->
+  <div class="col-12 col-lg-6">
+    <h5 class="fw-bold mb-4">Historial</h5>
+    <div class="d-grid gap-3">
+      {% for c in historial %}
+      <div class="card border-0 shadow-sm rounded-4 {% if c.activa %}border-start border-4 border-success{% endif %}">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <h6 class="fw-bold mb-1">{{ c.nombre }}
+                {% if c.activa %}<span class="badge bg-success ms-2">Activa</span>{% else %}<span class="badge bg-secondary ms-2">Cerrada</span>{% endif %}
+              </h6>
+              <div class="small text-muted">
+                <div>Apertura: {{ c.fecha_apertura.strftime('%d/%m/%Y %H:%M') }}</div>
+                <div>Cierre: {{ c.fecha_cierre.strftime('%d/%m/%Y %H:%M') }}</div>
+              </div>
+            </div>
+            <div class="text-end">
+              <div class="fw-bold">{{ c.vacantes_ocupadas }}/{{ c.total_vacantes }}</div>
+              <div class="text-muted small">vacantes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="text-center py-4 text-muted small">No hay convocatorias anteriores.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

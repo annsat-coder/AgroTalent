@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroTalent — Reclutamiento Digital</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+</head>
+<body class="landing-body">
+<div class="landing-hero d-flex flex-column align-items-center justify-content-center min-vh-100 px-3 text-center">
+  <div class="mb-4">
+    <i class="bi bi-leaf-fill text-warning" style="font-size:3.5rem"></i>
+  </div>
+  <h1 class="fw-bold text-white mb-1" style="font-size:2.2rem">AgroTalent</h1>
+  <p class="text-white-50 mb-5" style="font-size:1rem">Sistema Digital de Reclutamiento · ProAgro S.A.</p>
+
+  <div class="landing-card p-4 rounded-4 shadow-lg w-100" style="max-width:380px">
+    <h6 class="fw-bold mb-1 text-dark">¿Cómo deseas ingresar?</h6>
+    <p class="text-muted small mb-4">Selecciona tu perfil para continuar</p>
+    <div class="d-grid gap-3">
+      <a href="{{ url_for('registro') }}" class="btn btn-success btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2">
+        <i class="bi bi-person-plus-fill"></i> Soy postulante nuevo
+      </a>
+      <a href="{{ url_for('login') }}" class="btn btn-outline-success btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2">
+        <i class="bi bi-box-arrow-in-right"></i> Ya tengo cuenta
+      </a>
+    </div>
+
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Cita en Tópico{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-6">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <a href="{{ url_for('postulante_dashboard') }}" class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-arrow-left"></i></a>
+      <h5 class="fw-bold mb-0">Cita médica en tópico</h5>
+    </div>
+
+    {% if ya_tiene_cita %}
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4 text-center">
+        <i class="bi bi-calendar-check-fill text-success" style="font-size:3rem"></i>
+        <h5 class="fw-bold mt-3">Cita ya programada</h5>
+        {% if postulante.cita %}
+        <div class="bg-light rounded-3 p-3 mt-3 text-start small">
+          <div class="row g-2">
+            <div class="col-6"><span class="text-muted">Fecha:</span><br>
+              <strong>{{ postulante.cita.dia.fecha.strftime('%d/%m/%Y') if postulante.cita.dia else '—' }}</strong></div>
+            <div class="col-6"><span class="text-muted">Bloque:</span><br>
+              <strong>{{ postulante.cita.etiqueta_bloque }}</strong></div>
+            <div class="col-12"><span class="text-muted">Estado:</span><br>
+              <span class="badge bg-warning text-dark">{{ postulante.cita.estado_cita.title() }}</span>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        <a href="{{ url_for('postulante_dashboard') }}" class="btn btn-success mt-3 rounded-3">Volver a mi panel</a>
+      </div>
+    </div>
+
+    {% elif confirmar and bloque_sel %}
+    <!-- Pantalla de confirmación -->
+    <div class="alert alert-warning rounded-3 mb-4">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <strong>Confirma tu cita.</strong> Una vez confirmada no podrás cambiarla.
+    </div>
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3">Resumen de tu cita</h6>
+        <div class="row g-3 small">
+          <div class="col-6">
+            <span class="text-muted">Fecha:</span><br>
+            <strong>{{ bloque_sel.dia.fecha.strftime('%d/%m/%Y') if bloque_sel.dia else '—' }}</strong>
+          </div>
+          <div class="col-6">
+            <span class="text-muted">Bloque:</span><br>
+            <strong>Bloque {{ bloque_sel.nombre }}</strong>
+          </div>
+          <div class="col-6">
+            <span class="text-muted">Hora inicio:</span><br>
+            <strong>{{ bloque_sel.hora_inicio | hora_ampm }}</strong>
+          </div>
+          <div class="col-6">
+            <span class="text-muted">Hora fin:</span><br>
+            <strong>{{ bloque_sel.hora_fin | hora_ampm }}</strong>
+          </div>
+          <div class="col-6">
+            <span class="text-muted">Cupos disponibles:</span><br>
+            <strong>{{ bloque_sel.cupos_disponibles }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex gap-3">
+      <a href="{{ url_for('postulante_cita_topico') }}" class="btn btn-outline-secondary rounded-3 flex-grow-1">
+        <i class="bi bi-arrow-left"></i> Cambiar horario
+      </a>
+      <form method="POST" class="flex-grow-1">
+        <input type="hidden" name="accion" value="confirmar">
+        <input type="hidden" name="bloque_id" value="{{ bloque_sel.id }}">
+        <button type="submit" class="btn btn-success btn-lg rounded-3 w-100">
+          <i class="bi bi-check-circle-fill"></i> Confirmar cita
+        </button>
+      </form>
+    </div>
+
+    {% elif not bloques %}
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4 text-center py-5">
+        <i class="bi bi-calendar-x text-warning" style="font-size:3rem"></i>
+        <h6 class="fw-bold mt-3">Sin bloques disponibles</h6>
+        <p class="text-muted small">No hay cupos disponibles en este momento. Comunícate con Recursos Humanos.</p>
+      </div>
+    </div>
+
+    {% else %}
+    <div class="alert alert-info rounded-3 mb-4">
+      <i class="bi bi-info-circle-fill"></i>
+      Tu vacante está <strong>reservada</strong>. Selecciona un bloque horario para tu evaluación médica.
+    </div>
+
+    {% if dia %}
+    <div class="bg-light rounded-3 px-3 py-2 mb-3 small">
+      <i class="bi bi-calendar3 text-success me-1"></i>
+      <strong>Fecha de atención:</strong> {{ dia.fecha.strftime('%d/%m/%Y') }}
+    </div>
+    {% endif %}
+
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <form method="POST">
+          <input type="hidden" name="accion" value="seleccionar">
+          <div class="d-grid gap-2 mb-4">
+            {% for b in bloques %}
+            <div class="form-check option-card rounded-3 p-3 border">
+              <input class="form-check-input" type="radio" name="bloque_id"
+                     id="bloque_{{ b.id }}" value="{{ b.id }}" required>
+              <label class="form-check-label w-100 d-flex justify-content-between align-items-center"
+                     for="bloque_{{ b.id }}">
+                <span>
+                  <i class="bi bi-clock text-success me-2"></i>
+                  <strong>Bloque {{ b.nombre }}</strong> — {{ b.hora_inicio | hora_ampm }} a {{ b.hora_fin | hora_ampm }}
+                </span>
+                <span class="badge bg-light text-dark border">{{ b.cupos_disponibles }} cupos</span>
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-arrow-right-circle-fill"></i> Continuar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

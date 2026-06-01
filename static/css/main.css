@@ -1,0 +1,164 @@
+/* ── Variables ──────────────────────────────── */
+:root {
+  --verde: #1a6e2e;
+  --verde-medio: #28a745;
+  --verde-claro: #e8f5e9;
+  --amarillo: #f5c518;
+  --gris: #f8f9fa;
+  --texto: #212529;
+  --muted: #6c757d;
+}
+
+/* ── Base ───────────────────────────────────── */
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background-color: #f0f4f0;
+  color: var(--texto);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Landing ────────────────────────────────── */
+.landing-body {
+  background: linear-gradient(145deg, #1a6e2e 0%, #2e7d32 50%, #145a22 100%);
+}
+.landing-card {
+  background: #fff;
+}
+
+/* ── Navbar ─────────────────────────────────── */
+#mainNav {
+  background: linear-gradient(90deg, #1a6e2e, #2e7d32);
+  box-shadow: 0 2px 12px rgba(0,0,0,.12);
+  padding: .5rem 1rem;
+}
+#mainNav .nav-link {
+  color: rgba(255,255,255,.85) !important;
+  border-radius: .5rem;
+  padding: .4rem .75rem !important;
+  font-size: .9rem;
+  transition: background .15s;
+}
+#mainNav .nav-link:hover,
+#mainNav .nav-link.active {
+  background: rgba(255,255,255,.15);
+  color: #fff !important;
+}
+
+/* ── Cards ──────────────────────────────────── */
+.card {
+  transition: box-shadow .15s;
+}
+.card-hover:hover {
+  box-shadow: 0 6px 24px rgba(0,0,0,.1) !important;
+  transform: translateY(-1px);
+}
+
+/* ── Buttons ────────────────────────────────── */
+.btn-success {
+  background-color: var(--verde);
+  border-color: var(--verde);
+}
+.btn-success:hover, .btn-success:focus {
+  background-color: #145a22;
+  border-color: #145a22;
+}
+.btn-outline-success {
+  color: var(--verde);
+  border-color: var(--verde);
+}
+.btn-outline-success:hover {
+  background-color: var(--verde);
+  border-color: var(--verde);
+}
+
+/* Botones grandes para celular */
+@media (max-width: 576px) {
+  .btn-lg {
+    padding: .8rem 1.2rem;
+    font-size: 1rem;
+  }
+  .btn {
+    min-height: 44px;
+  }
+}
+
+/* ── Forms ──────────────────────────────────── */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--verde-medio);
+  box-shadow: 0 0 0 .2rem rgba(40,167,69,.2);
+}
+.form-check-input:checked {
+  background-color: var(--verde);
+  border-color: var(--verde);
+}
+
+/* ── Option cards (radio como tarjeta) ──────── */
+.option-card {
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.option-card:hover {
+  border-color: var(--verde-medio) !important;
+  background-color: var(--verde-claro);
+}
+.form-check-input:checked ~ .option-card,
+.option-card:has(.form-check-input:checked) {
+  border-color: var(--verde) !important;
+  background-color: var(--verde-claro);
+}
+
+/* ── Steps / Pasos ──────────────────────────── */
+.paso-item {
+  padding: .5rem 0;
+}
+.paso-item + .paso-item {
+  border-top: 1px solid #f0f0f0;
+}
+
+/* ── KPI icons ──────────────────────────────── */
+.kpi-icon {
+  flex-shrink: 0;
+}
+
+/* ── Table ──────────────────────────────────── */
+.table > :not(caption) > * > * {
+  padding: .75rem .5rem;
+}
+.table-hover tbody tr:hover {
+  background-color: var(--verde-claro);
+}
+
+/* ── QR container ───────────────────────────── */
+.qr-container {
+  border: 2px solid #e0e0e0 !important;
+}
+
+/* ── Footer ─────────────────────────────────── */
+.footer-bar {
+  background: #fff;
+  border-top: 1px solid #e9ecef;
+  margin-top: auto;
+}
+
+/* ── Progress ───────────────────────────────── */
+.progress {
+  background-color: #e0e0e0;
+}
+
+/* ── Badges legibility ──────────────────────── */
+.badge {
+  font-weight: 500;
+  letter-spacing: .01em;
+}
+
+/* ── Responsive tweaks ──────────────────────── */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  h5.fw-bold { font-size: 1.1rem; }
+}

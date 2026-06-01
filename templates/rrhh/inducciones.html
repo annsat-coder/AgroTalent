@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Inducciones{% endblock %}
+{% block content %}
+<h5 class="fw-bold mb-4">Gestión de inducciones virtuales</h5>
+<p class="text-muted small mb-4">Edita los videos y preguntas de cada inducción. El sistema seleccionará 3 preguntas al azar para cada postulante.</p>
+
+{% for ind in inducciones %}
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+  <div class="card-body p-4">
+
+    <!-- Encabezado inducción -->
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <span class="badge bg-success">{{ ind.orden }}</span>
+      <h6 class="fw-bold mb-0">{{ ind.titulo }}</h6>
+      <button class="btn btn-sm btn-outline-secondary rounded-3 ms-auto"
+              type="button" data-bs-toggle="collapse"
+              data-bs-target="#editInd{{ ind.id }}">
+        <i class="bi bi-pencil-fill"></i> Editar
+      </button>
+    </div>
+
+    <!-- Form editar inducción -->
+    <div class="collapse mb-3" id="editInd{{ ind.id }}">
+      <div class="bg-light rounded-3 p-3">
+        <form method="POST">
+          <input type="hidden" name="accion" value="editar_induccion">
+          <input type="hidden" name="ind_id" value="{{ ind.id }}">
+          <div class="mb-2">
+            <label class="form-label small fw-semibold">Título</label>
+            <input type="text" name="titulo" class="form-control form-control-sm rounded-3"
+                   value="{{ ind.titulo }}" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label small fw-semibold">Descripción</label>
+            <textarea name="descripcion" class="form-control form-control-sm rounded-3" rows="2">{{ ind.descripcion }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">URL del video (YouTube embed)</label>
+            <input type="url" name="video_url" class="form-control form-control-sm rounded-3"
+                   value="{{ ind.video_url }}" placeholder="https://www.youtube.com/embed/...">
+            <div class="form-text">Usa el formato embed: youtube.com/embed/ID_DEL_VIDEO</div>
+          </div>
+          <button type="submit" class="btn btn-success btn-sm rounded-3">
+            <i class="bi bi-check-circle-fill"></i> Guardar cambios
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Preguntas actuales -->
+    <div class="small text-muted fw-semibold mb-2">
+      <i class="bi bi-patch-question-fill text-warning"></i>
+      Banco de preguntas ({{ ind.preguntas | length }}) — se muestran 3 al azar por postulante
+    </div>
+
+    <div class="d-grid gap-2 mb-3">
+      {% for preg in ind.preguntas %}
+      <div class="border rounded-3 p-3">
+        <div class="d-flex align-items-start justify-content-between gap-2">
+          <div class="small flex-grow-1">
+            <div class="fw-semibold mb-1">{{ loop.index }}. {{ preg.texto }}</div>
+            <div class="text-muted">
+              <span class="{% if preg.respuesta_correcta == 'a' %}text-success fw-semibold{% endif %}">A) {{ preg.opcion_a }}</span> ·
+              <span class="{% if preg.respuesta_correcta == 'b' %}text-success fw-semibold{% endif %}">B) {{ preg.opcion_b }}</span> ·
+              <span class="{% if preg.respuesta_correcta == 'c' %}text-success fw-semibold{% endif %}">C) {{ preg.opcion_c }}</span>
+            </div>
+          </div>
+          <div class="d-flex gap-1 flex-shrink-0">
+            <button class="btn btn-sm btn-outline-secondary rounded-3" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#editPreg{{ preg.id }}">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <form method="POST" class="d-inline">
+              <input type="hidden" name="accion" value="eliminar_pregunta">
+              <input type="hidden" name="preg_id" value="{{ preg.id }}">
+              <button type="submit" class="btn btn-sm btn-outline-danger rounded-3"
+                      onclick="return confirm('¿Eliminar esta pregunta?')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Form editar pregunta -->
+        <div class="collapse mt-2" id="editPreg{{ preg.id }}">
+          <form method="POST" class="bg-light rounded-3 p-3">
+            <input type="hidden" name="accion" value="editar_pregunta">
+            <input type="hidden" name="preg_id" value="{{ preg.id }}">
+            <div class="mb-2">
+              <label class="form-label small fw-semibold">Pregunta</label>
+              <input type="text" name="texto" class="form-control form-control-sm rounded-3"
+                     value="{{ preg.texto }}" required>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col-12 col-md-4">
+                <label class="form-label small">Opción A</label>
+                <input type="text" name="opcion_a" class="form-control form-control-sm rounded-3"
+                       value="{{ preg.opcion_a }}" required>
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small">Opción B</label>
+                <input type="text" name="opcion_b" class="form-control form-control-sm rounded-3"
+                       value="{{ preg.opcion_b }}" required>
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small">Opción C</label>
+                <input type="text" name="opcion_c" class="form-control form-control-sm rounded-3"
+                       value="{{ preg.opcion_c }}" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Respuesta correcta</label>
+              <select name="correcta" class="form-select form-select-sm rounded-3">
+                <option value="a" {% if preg.respuesta_correcta == 'a' %}selected{% endif %}>A</option>
+                <option value="b" {% if preg.respuesta_correcta == 'b' %}selected{% endif %}>B</option>
+                <option value="c" {% if preg.respuesta_correcta == 'c' %}selected{% endif %}>C</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-success btn-sm rounded-3">
+              <i class="bi bi-check-circle-fill"></i> Guardar
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Agregar nueva pregunta -->
+    <button class="btn btn-outline-success btn-sm rounded-3" type="button"
+            data-bs-toggle="collapse" data-bs-target="#nuevaPreg{{ ind.id }}">
+      <i class="bi bi-plus-circle-fill"></i> Agregar pregunta
+    </button>
+    <div class="collapse mt-3" id="nuevaPreg{{ ind.id }}">
+      <form method="POST" class="bg-light rounded-3 p-3">
+        <input type="hidden" name="accion" value="agregar_pregunta">
+        <input type="hidden" name="ind_id" value="{{ ind.id }}">
+        <div class="mb-2">
+          <label class="form-label small fw-semibold">Pregunta <span class="text-danger">*</span></label>
+          <input type="text" name="texto" class="form-control form-control-sm rounded-3"
+                 placeholder="Escribe la pregunta aquí..." required>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-12 col-md-4">
+            <label class="form-label small">Opción A <span class="text-danger">*</span></label>
+            <input type="text" name="opcion_a" class="form-control form-control-sm rounded-3" required>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label small">Opción B <span class="text-danger">*</span></label>
+            <input type="text" name="opcion_b" class="form-control form-control-sm rounded-3" required>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label small">Opción C <span class="text-danger">*</span></label>
+            <input type="text" name="opcion_c" class="form-control form-control-sm rounded-3" required>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Respuesta correcta</label>
+          <select name="correcta" class="form-select form-select-sm rounded-3">
+            <option value="a">A</option>
+            <option value="b">B</option>
+            <option value="c">C</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-success btn-sm rounded-3">
+          <i class="bi bi-plus-circle-fill"></i> Agregar pregunta
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

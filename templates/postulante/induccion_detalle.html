@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}{{ induccion.titulo }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <a href="{{ url_for('postulante_inducciones') }}" class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-arrow-left"></i></a>
+      <div>
+        <h5 class="fw-bold mb-0">{{ induccion.titulo }}</h5>
+        <small class="text-muted">Inducción {{ induccion.orden }} de 4</small>
+      </div>
+    </div>
+
+    {% set av = avance %}
+    {% set ya_aprobada = av and av.aprobado %}
+    {% set video_visto = av and av.video_completado %}
+
+    {% if ya_aprobada %}
+    <div class="card border-0 shadow-sm rounded-4 border-start border-4 border-success">
+      <div class="card-body p-4 text-center">
+        <i class="bi bi-check-circle-fill text-success" style="font-size:3rem"></i>
+        <h5 class="fw-bold mt-3">¡Inducción aprobada!</h5>
+        <a href="{{ url_for('postulante_inducciones') }}" class="btn btn-success rounded-3 px-4 mt-2">
+          <i class="bi bi-arrow-right-circle"></i> Volver a inducciones
+        </a>
+      </div>
+    </div>
+
+    {% elif not video_visto %}
+    <!-- PASO 1: Ver el video completo -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-2">
+          <span class="badge bg-success me-2">Paso 1</span> Ver el video completo
+        </h6>
+        <p class="text-muted small mb-3">{{ induccion.descripcion }}</p>
+
+        <!-- Contenedor del video YouTube -->
+        <div id="player-wrapper" class="ratio ratio-16x9 rounded-3 overflow-hidden bg-dark mb-3">
+          <div id="yt-player"></div>
+        </div>
+
+        <div class="alert alert-warning rounded-3 small mb-3" id="aviso-video">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          Debes ver el video completo para continuar. El botón se habilitará al terminar.
+        </div>
+
+        <form method="POST" id="formVideoCompleto" style="display:none">
+          <input type="hidden" name="accion" value="video_completado">
+          <div class="alert alert-success rounded-3 small mb-3">
+            <i class="bi bi-check-circle-fill"></i> ¡Video completado! Ahora responde el cuestionario.
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-arrow-right-circle-fill"></i> Ir al cuestionario
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% else %}
+    <!-- PASO 2: Cuestionario -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-1">
+          <span class="badge bg-warning text-dark me-2">Paso 2</span> Cuestionario
+        </h6>
+        <p class="text-muted small mb-4">Responde las {{ preguntas|length }} preguntas. Debes acertar <strong>todas</strong>.</p>
+        <form method="POST">
+          <input type="hidden" name="accion" value="cuestionario">
+          {% for preg in preguntas %}
+          <div class="mb-4">
+            <p class="fw-semibold mb-2">{{ loop.index }}. {{ preg.texto }}</p>
+            <div class="d-grid gap-2">
+              {% for opcion, letra in [(preg.opcion_a,'a'),(preg.opcion_b,'b'),(preg.opcion_c,'c')] %}
+              <div class="form-check option-card rounded-3 p-3 border">
+                <input class="form-check-input" type="radio" name="preg_{{ preg.id }}"
+                       id="p{{ preg.id }}_{{ letra }}" value="{{ letra }}" required>
+                <label class="form-check-label w-100" for="p{{ preg.id }}_{{ letra }}">
+                  <span class="badge bg-light text-dark border me-2">{{ letra.upper() }}</span> {{ opcion }}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-send-fill"></i> Enviar respuestas
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% if not (avance and avance.video_completado) and not (avance and avance.aprobado) %}
+{% block extra_js %}
+<script>
+// Extraer el video ID de la URL de la induccion
+var videoUrl = "{{ induccion.video_url }}";
+var videoId = '';
+var match = videoUrl.match(/embed\/([^?&]+)/);
+if (match) videoId = match[1];
+
+// Cargar YouTube IFrame API
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+document.head.appendChild(tag);
+
+var player;
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('yt-player', {
+    videoId: videoId,
+    playerVars: {
+      autoplay: 0,
+      controls: 1,
+      disablekb: 0,
+      rel: 0,
+      modestbranding: 1
+    },
+    events: {
+      onStateChange: onPlayerStateChange
+    }
+  });
+}
+
+function onPlayerStateChange(event) {
+  // YT.PlayerState.ENDED = 0
+  if (event.data === YT.PlayerState.ENDED) {
+    document.getElementById('aviso-video').style.display = 'none';
+    document.getElementById('formVideoCompleto').style.display = 'block';
+    // Solo mostrar el boton, postulante decide cuando continuar
+  }
+}
+</script>
+{% endblock %}
+{% endif %}
