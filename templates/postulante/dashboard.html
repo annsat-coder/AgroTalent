@@ -107,6 +107,10 @@
               Tienes cita médica el <strong>{{ postulante.cita.dia.fecha.strftime('%d/%m/%Y') }}</strong>
               — {{ postulante.cita.etiqueta_bloque }}
             </div>
+            {% elif postulante.declaracion and postulante.declaracion.tiene_condicion and not postulante.cita and postulante.estado_vacante == 'reservada' %}
+            <a href="{{ url_for('postulante_cita_topico') }}" class="btn btn-warning btn-sm mt-2 px-3 rounded-3">
+              <i class="bi bi-calendar-plus-fill"></i> Seleccionar cita en tópico
+            </a>
             {% endif %}
           </div>
         </div>
