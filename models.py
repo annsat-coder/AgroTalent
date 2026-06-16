@@ -102,10 +102,14 @@ class Postulante(db.Model):
     fecha_hora_habilitacion = db.Column(db.DateTime)
     creado_en = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # Validación de presentación en el lugar de trabajo (constancia de habilitación)
+    validado_en_fundo = db.Column(db.Boolean, default=False)
+    validado_en_fundo_en = db.Column(db.DateTime)
+    codigo_constancia = db.Column(db.String(12), unique=True, nullable=True)
+
     inducciones = db.relationship('AvanceInduccion', backref='postulante', lazy=True)
     declaracion = db.relationship('DeclaracionSalud', backref='postulante', uselist=False)
     cita = db.relationship('CitaTopico', backref='postulante', uselist=False)
-    pase_qr = db.relationship('PaseQR', backref='postulante', uselist=False)
     historial = db.relationship('HistorialEstado', backref='postulante', lazy=True)
 
     @property
@@ -252,20 +256,6 @@ class CitaTopico(db.Model):
         if self.bloque_rel:
             return self.bloque_rel.etiqueta
         return ''
-
-
-class PaseQR(db.Model):
-    __tablename__ = 'pases_qr'
-    id = db.Column(db.Integer, primary_key=True)
-    postulante_id = db.Column(db.Integer, db.ForeignKey('postulantes.id'), nullable=False)
-    codigo = db.Column(db.String(100), unique=True, nullable=False)
-    imagen_path = db.Column(db.String(300))
-    # franja de firma (antes de trabajar)
-    hora_firma_inicio = db.Column(db.String(10))
-    hora_firma_fin = db.Column(db.String(10))
-    generado_en = db.Column(db.DateTime, default=datetime.utcnow)
-    validado = db.Column(db.Boolean, default=False)
-    validado_en = db.Column(db.DateTime)
 
 
 class HistorialEstado(db.Model):

@@ -9,14 +9,14 @@ def seed_db():
     # ── Staff ──────────────────────────────────────────────────────────────
     if not Usuario.query.filter_by(dni='00000001').first():
         rrhh = Usuario(dni='00000001', nombres='Administrador', apellidos='RR.HH.',
-                       celular='999000001', correo='rrhh@proagro.pe',
+                       celular='999000001', correo='rrhh@empresa-agroindustrial.pe',
                        rol='rrhh', verificado=True, activo=True, es_jefe=True, password_temporal=False)
         rrhh.set_password('rrhh1234')
         db.session.add(rrhh)
 
     if not Usuario.query.filter_by(dni='00000002').first():
         medico = Usuario(dni='00000002', nombres='Dr. Juan', apellidos='Pérez',
-                         celular='999000002', correo='medico@proagro.pe',
+                         celular='999000002', correo='medico@empresa-agroindustrial.pe',
                          rol='medico', verificado=True, activo=True)
         medico.set_password('medico1234')
         db.session.add(medico)
@@ -29,7 +29,7 @@ def seed_db():
             fecha_cierre=datetime(2026, 6, 30, 18, 0),
             fecha_presentacion=date(2026, 6, 1),
             hora_presentacion='06:30',
-            lugar_presentacion='Fundo ProAgro — Km 12 Carretera Piura-Chulucanas',
+            lugar_presentacion='Fundo de la Empresa Agroindustrial — Km 12 Carretera Piura-Chulucanas',
             activa=True
         )
         db.session.add(conv)
@@ -64,10 +64,10 @@ def seed_db():
             },
             {
                 'orden': 2, 'titulo': 'Calidad',
-                'descripcion': 'Estándares de calidad de ProAgro y su impacto en las certificaciones internacionales.',
+                'descripcion': 'Estándares de calidad de la Empresa Agroindustrial y su impacto en las certificaciones internacionales.',
                 'video_url': 'https://www.youtube.com/embed/dQw4w9WgXcQ',
                 'preguntas': [
-                    {'texto': '¿Qué certificación de calidad maneja ProAgro?',
+                    {'texto': '¿Qué certificación de calidad maneja la Empresa Agroindustrial?',
                      'a': 'ISO 9001', 'b': 'GlobalGAP', 'c': 'Ambas son correctas', 'correcta': 'c'},
                     {'texto': '¿Qué haces si detectas un producto con defecto?',
                      'a': 'Ignorarlo', 'b': 'Separarlo y comunicarlo al supervisor', 'c': 'Desecharlo sin reportar', 'correcta': 'b'},
@@ -97,7 +97,7 @@ def seed_db():
                      'a': 'Con huella dactilar o tarjeta', 'b': 'Solo con firma en papel', 'c': 'No se registra', 'correcta': 'a'},
                     {'texto': '¿Cuándo se realiza el pago de remuneraciones?',
                      'a': 'Cada dos semanas', 'b': 'Al final del contrato', 'c': 'Según el cronograma del contrato', 'correcta': 'c'},
-                    {'texto': '¿Qué conducta está prohibida en ProAgro?',
+                    {'texto': '¿Qué conducta está prohibida en la Empresa Agroindustrial?',
                      'a': 'Usar el uniforme completo', 'b': 'Consumir alcohol o sustancias prohibidas', 'c': 'Reportar incidentes', 'correcta': 'b'},
                 ]
             },

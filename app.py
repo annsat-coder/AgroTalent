@@ -1,19 +1,17 @@
-import os, uuid, random, string
+import os, random, string
 from datetime import datetime, date, timedelta
 from functools import wraps
 from flask import Flask, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import (db, bcrypt, Usuario, Convocatoria, PuestoConvocatoria, Postulante,
                     Induccion, PreguntaInduccion, AvanceInduccion, DeclaracionSalud,
-                    DiaTopico, BloqueTopico, CitaTopico, PaseQR, HistorialEstado)
+                    DiaTopico, BloqueTopico, CitaTopico, HistorialEstado)
 from seed import seed_db
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'proagro-secret-2026')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///proagro.db')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'agrotalent-secret-2026')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///agrotalent.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['QR_FOLDER'] = os.path.join(app.root_path, 'static', 'qr')
-os.makedirs(app.config['QR_FOLDER'], exist_ok=True)
 
 db.init_app(app)
 bcrypt.init_app(app)
@@ -51,21 +49,40 @@ def generar_otp():
     return ''.join(random.choices(string.digits, k=6))
 
 
-def generar_qr(postulante, conv):
-    import qrcode
-    codigo = str(uuid.uuid4())
-    img = qrcode.make(codigo)
-    filename = f"qr_{postulante.usuario.dni}.png"
-    img.save(os.path.join(app.config['QR_FOLDER'], filename))
-    hora_ini = conv.hora_presentacion if conv else '06:30'
-    h, m = map(int, hora_ini.split(':'))
-    hora_fin_dt = datetime(2000, 1, 1, h, m) + timedelta(hours=1, minutes=30)
-    hora_fin = hora_fin_dt.strftime('%H:%M')
-    pase = PaseQR(postulante_id=postulante.id, codigo=codigo,
-                  imagen_path=filename,
-                  hora_firma_inicio=hora_ini, hora_firma_fin=hora_fin)
-    db.session.add(pase)
-    return pase
+def mensaje_presentacion(conv):
+    """Mensaje de confirmación de vacante: indica fecha, hora y lugar
+    de presentación tomados de la convocatoria activa."""
+    if not conv:
+        return '¡Felicitaciones! Fuiste seleccionado. Pronto te informaremos fecha, hora y lugar de presentación.'
+    fecha = conv.fecha_presentacion.strftime('%d/%m/%Y') if conv.fecha_presentacion else '—'
+    hora = hora_ampm(conv.hora_presentacion) if conv.hora_presentacion else '—'
+    lugar = conv.lugar_presentacion or '—'
+    return f'¡Felicitaciones! Fuiste seleccionado. Preséntate el {fecha} a las {hora} en {lugar}.'
+
+
+def asegurar_codigo_constancia(p):
+    """Genera y persiste un código alfanumérico único para la Constancia de
+    Habilitación si el postulante aún no tiene uno."""
+    if p.codigo_constancia:
+        return p.codigo_constancia
+    letras = string.ascii_uppercase
+    while True:
+        candidato = 'CH-' + ''.join(random.choices(letras + string.digits, k=6))
+        if not Postulante.query.filter_by(codigo_constancia=candidato).first():
+            p.codigo_constancia = candidato
+            return candidato
+
+
+def estado_constancia(p):
+    """Mapea el estado interno del proceso al estado mostrado en la
+    Constancia de Habilitación."""
+    if p.estado_proceso in ('seleccionado', 'incorporado'):
+        return 'habilitado'
+    if p.estado_proceso == 'cita_programada':
+        return 'evaluacion'
+    if p.estado_proceso == 'lista_espera':
+        return 'espera'
+    return 'pendiente'
 
 
 def rol_requerido(*roles):
@@ -253,6 +270,33 @@ def postulante_dashboard():
     return render_template('postulante/dashboard.html',
                            postulante=p, inducciones=inducciones,
                            avances=avances, conv=conv)
+
+
+@app.route('/postulante/constancia')
+@login_required
+@rol_requerido('postulante')
+def postulante_constancia():
+    p = current_user.postulante
+    conv = convocatoria_activa()
+    if estado_constancia(p) == 'habilitado' and not p.codigo_constancia:
+        asegurar_codigo_constancia(p)
+        db.session.commit()
+    return render_template('postulante/constancia.html',
+                           postulante=p, conv=conv, estado=estado_constancia(p))
+
+
+@app.route('/postulante/constancia/imprimir')
+@login_required
+@rol_requerido('postulante')
+def postulante_constancia_imprimir():
+    p = current_user.postulante
+    conv = convocatoria_activa()
+    if estado_constancia(p) == 'habilitado' and not p.codigo_constancia:
+        asegurar_codigo_constancia(p)
+        db.session.commit()
+    return render_template('postulante/constancia_imprimir.html',
+                           postulante=p, conv=conv, estado=estado_constancia(p),
+                           now_str=datetime.utcnow().strftime('%d/%m/%Y'))
 
 
 DISTRITOS = ['Piura','Castilla','Catacaos','Cura Mori','El Tallán','La Arena',
@@ -447,11 +491,10 @@ def postulante_declaracion():
                 p.estado_vacante = 'confirmada'
                 p.fecha_hora_habilitacion = datetime.utcnow()
                 registrar_historial(p, 'seleccionado', 'Vacante confirmada')
+                asegurar_codigo_constancia(p)
                 db.session.commit()
-                generar_qr(p, conv)
-                db.session.commit()
-                flash('¡Felicidades! Tienes una vacante. Aquí está tu pase QR.', 'success')
-                return redirect(url_for('postulante_qr'))
+                flash(mensaje_presentacion(conv), 'success')
+                return redirect(url_for('postulante_dashboard'))
             else:
                 registrar_historial(p, 'lista_espera', 'Sin vacantes disponibles')
                 db.session.commit()
@@ -510,15 +553,6 @@ def postulante_cita_topico():
                            postulante=p, bloques=bloques_disponibles,
                            dia=dia, ya_tiene_cita=False,
                            confirmar=False, bloque_sel=None)
-
-
-@app.route('/postulante/qr')
-@login_required
-@rol_requerido('postulante')
-def postulante_qr():
-    p = current_user.postulante
-    conv = convocatoria_activa()
-    return render_template('postulante/qr.html', postulante=p, conv=conv)
 
 
 # ── RR.HH. ───────────────────────────────────────────────────────────────────
@@ -606,12 +640,12 @@ def rrhh_postulante_detalle(pid):
 @rol_requerido('rrhh')
 def rrhh_incorporar(pid):
     p = Postulante.query.get_or_404(pid)
-    if p.pase_qr and p.pase_qr.validado:
+    if p.validado_en_fundo:
         registrar_historial(p, 'incorporado', f'Incorporado por {current_user.nombres}')
         db.session.commit()
         flash(f'{p.nombres} {p.apellidos} incorporado.', 'success')
     else:
-        flash('El QR no ha sido validado aún.', 'warning')
+        flash('El DNI del postulante no ha sido validado en el fundo aún.', 'warning')
     return redirect(url_for('rrhh_postulante_detalle', pid=pid))
 
 
@@ -674,7 +708,7 @@ def rrhh_convocatoria():
                 fecha_apertura=f_apertura, fecha_cierre=f_cierre,
                 fecha_presentacion=f_presentacion,
                 hora_presentacion=request.form.get('hora_presentacion','').strip(),
-                lugar_presentacion='Fundo ProAgro — Km 12 Carretera Piura-Chulucanas',
+                lugar_presentacion='Fundo de la Empresa Agroindustrial — Km 12 Carretera Piura-Chulucanas',
                 activa=True
             )
             db.session.add(nueva)
@@ -763,34 +797,28 @@ def rrhh_topico():
     return render_template('rrhh/topico_horarios.html', conv=conv, dia=dia, bloques=bloques, siguiente_letra=siguiente_letra)
 
 
-@app.route('/rrhh/validar-qr', methods=['GET', 'POST'])
+@app.route('/rrhh/validar-dni', methods=['GET', 'POST'])
 @login_required
 @rol_requerido('rrhh')
-def rrhh_validar_qr():
+def rrhh_validar_dni():
     resultado = None
     postulante = None
     if request.method == 'POST':
-        codigo = request.form.get('codigo', '').strip()
         dni_manual = request.form.get('dni_manual', '').strip()
-        pase = None
-        if codigo:
-            pase = PaseQR.query.filter_by(codigo=codigo).first()
-        elif dni_manual:
-            u = Usuario.query.filter_by(dni=dni_manual).first()
-            if u and u.postulante:
-                pase = u.postulante.pase_qr
-        if pase:
-            postulante = pase.postulante
-            if pase.validado:
+        u = Usuario.query.filter_by(dni=dni_manual).first() if dni_manual else None
+        p = u.postulante if u else None
+        if p:
+            postulante = p
+            if p.validado_en_fundo:
                 resultado = 'ya_validado'
             else:
-                pase.validado = True
-                pase.validado_en = datetime.utcnow()
+                p.validado_en_fundo = True
+                p.validado_en_fundo_en = datetime.utcnow()
                 db.session.commit()
                 resultado = 'valido'
         else:
             resultado = 'invalido'
-    return render_template('rrhh/validar_qr.html', resultado=resultado, postulante=postulante)
+    return render_template('rrhh/validar_dni.html', resultado=resultado, postulante=postulante)
 
 
 
@@ -973,9 +1001,9 @@ def medico_evaluar(cita_id):
         if resultado == 'apto':
             p.estado_vacante = 'confirmada'
             registrar_historial(p, 'seleccionado', f'Médico: {current_user.nombres} — apto')
-            generar_qr(p, conv)
+            asegurar_codigo_constancia(p)
             db.session.commit()
-            flash('Postulante marcado como APTO. QR generado.', 'success')
+            flash(f'Postulante marcado como APTO. {mensaje_presentacion(conv)}', 'success')
         else:
             # liberar vacante
             puesto_conv = None

@@ -1,6 +1,6 @@
-# ProAgro — Sistema de Reclutamiento Digital
+# AgroTalent — Sistema de Reclutamiento Digital
 
-Prototipo web para reclutamiento de operarios temporales en ProAgro S.A.
+Prototipo web para reclutamiento de operarios temporales en una empresa agroindustrial.
 
 ## Stack
 - Python + Flask
@@ -37,7 +37,7 @@ Abrir en el navegador: http://localhost:5000
 
 Crea un archivo `.env` con:
 ```
-DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/proagro
+DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/agrotalent
 SECRET_KEY=clave-secreta
 ```
 
@@ -52,20 +52,19 @@ SECRET_KEY=clave-secreta
 ## Estructura del proyecto
 
 ```
-proagro/
+agrotalent/
 ├── app.py              # Rutas Flask (todas)
 ├── models.py           # Modelos SQLAlchemy
 ├── seed.py             # Datos iniciales
 ├── requirements.txt
 ├── static/
-│   ├── css/main.css    # Estilos globales (colores, fuentes, responsive)
-│   └── qr/             # Imágenes QR generadas
+│   └── css/main.css    # Estilos globales (colores, fuentes, responsive)
 └── templates/
     ├── base.html        # Layout base con navbar
     ├── index.html       # Pantalla de bienvenida
     ├── auth/            # Login y registro
-    ├── postulante/      # Dashboard, datos, inducciones, declaración, QR
-    ├── rrhh/            # Dashboard, postulantes, campañas, tópico, QR
+    ├── postulante/      # Dashboard, datos, inducciones, declaración, constancia
+    ├── rrhh/            # Dashboard, postulantes, campañas, tópico, validación
     └── medico/          # Dashboard, agenda, evaluación
 ```
 
