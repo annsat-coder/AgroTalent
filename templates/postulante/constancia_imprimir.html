@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Constancia — {{ postulante.nombres }} {{ postulante.apellidos }}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 12pt; color: #212529; background: #fff; }
+    .page { max-width: 190mm; margin: 0 auto; padding: 20mm 25mm; }
+    .header { text-align: center; margin-bottom: 22pt; padding-bottom: 14pt; border-bottom: 2px solid #1a6e2e; }
+    .header h1 { font-size: 16pt; font-weight: 800; color: #1a6e2e; }
+    .header p { font-size: 10pt; color: #555; margin-top: 4pt; }
+    .estado-badge { display: inline-block; padding: 8pt 18pt; border-radius: 24pt; font-weight: 700;
+                    font-size: 12pt; margin: 14pt 0; color: #fff; }
+    .estado-habilitado { background: #1a6e2e; }
+    .estado-evaluacion { background: #0d6efd; }
+    .estado-espera { background: #6c757d; }
+    .estado-pendiente { background: #b8860b; }
+    .field-row { display: flex; gap: 20pt; margin-bottom: 10pt; }
+    .field { flex: 1; }
+    .field-label { font-size: 9pt; color: #555; margin-bottom: 2pt; }
+    .field-value { font-size: 11pt; font-weight: 700; border-bottom: 1px solid #999; padding-bottom: 2pt; }
+    .codigo-box { text-align: center; margin: 18pt 0; padding: 12pt; background: #e8f5e9; border-radius: 10pt; }
+    .codigo-box .label { font-size: 9pt; color: #555; }
+    .codigo-box .codigo { font-family: 'Courier New', monospace; font-size: 16pt; font-weight: 800;
+                            letter-spacing: .12em; color: #1a6e2e; margin-top: 4pt; }
+    .mensaje { text-align: justify; line-height: 1.6; font-size: 11pt; margin-top: 16pt;
+               padding: 12pt; background: #f8f9fa; border-radius: 8pt; }
+    .footer-nota { margin-top: 30pt; font-size: 9pt; color: #777; text-align: center; }
+    .no-print { background: #1a6e2e; color: white; border: none; padding: 10px 24px;
+                border-radius: 8px; font-size: 13px; cursor: pointer; margin: 16px 8px 0 0; }
+    .no-print.sec { background: #6c757d; }
+    .no-print-bar { padding: 12px 25mm; background: #f8f9fa; border-bottom: 1px solid #dee2e6; }
+    @media print {
+      .no-print-bar { display: none !important; }
+      .page { padding: 15mm 20mm; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="no-print-bar">
+  <button class="no-print" onclick="window.print()">
+    🖨️ Imprimir / Guardar PDF
+  </button>
+  <button class="no-print sec" onclick="window.close()">
+    ← Volver
+  </button>
+</div>
+
+<div class="page">
+  <div class="header">
+    <h1>Constancia de Habilitación</h1>
+    <p>Sistema de Reclutamiento Digital · Empresa Agroindustrial</p>
+  </div>
+
+  <div style="text-align:center">
+    {% if estado == 'habilitado' %}
+    <span class="estado-badge estado-habilitado">HABILITADO PARA FIRMA DE CONTRATO</span>
+    {% elif estado == 'evaluacion' %}
+    <span class="estado-badge estado-evaluacion">DERIVADO A EVALUACIÓN MÉDICA</span>
+    {% elif estado == 'espera' %}
+    <span class="estado-badge estado-espera">EN LISTA DE ESPERA</span>
+    {% else %}
+    <span class="estado-badge estado-pendiente">PENDIENTE DE EVALUACIÓN</span>
+    {% endif %}
+  </div>
+
+  <div class="field-row">
+    <div class="field">
+      <div class="field-label">Nombre completo</div>
+      <div class="field-value">{{ postulante.nombres }} {{ postulante.apellidos }}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">DNI</div>
+      <div class="field-value">{{ postulante.dni }}</div>
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <div class="field-label">Puesto</div>
+      <div class="field-value">{{ postulante.puesto or '________' }}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Fecha de emisión</div>
+      <div class="field-value">{{ now_str }}</div>
+    </div>
+  </div>
+
+  {% if conv %}
+  <div class="field-row">
+    <div class="field">
+      <div class="field-label">Fecha de presentación</div>
+      <div class="field-value">{{ conv.fecha_presentacion.strftime('%d/%m/%Y') }}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Horario asignado</div>
+      <div class="field-value">{{ conv.hora_presentacion | hora_ampm }}</div>
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <div class="field-label">Lugar de presentación</div>
+      <div class="field-value">{{ conv.lugar_presentacion }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if postulante.codigo_constancia %}
+  <div class="codigo-box">
+    <div class="label">Código de habilitación</div>
+    <div class="codigo">{{ postulante.codigo_constancia }}</div>
+  </div>
+  {% endif %}
+
+  <div class="mensaje">
+    {% if estado == 'habilitado' %}
+    Tu registro fue completado exitosamente. Preséntate con tu DNI el día y horario asignados para continuar con el proceso de contratación.
+    {% elif estado == 'evaluacion' %}
+    Fuiste derivado a evaluación médica en el tópico de salud. Revisa la fecha y bloque de tu cita en el panel principal del sistema.
+    {% elif estado == 'espera' %}
+    No hay vacantes disponibles por el momento para tu puesto postulado. Quedas en lista de espera y se te notificará si se libera un cupo.
+    {% else %}
+    Tu proceso de postulación aún está en evaluación. Esta constancia se actualizará automáticamente cuando tengas una vacante confirmada.
+    {% endif %}
+  </div>
+
+  <div class="footer-nota">
+    Documento generado automáticamente por el sistema de reclutamiento. No requiere firma ni sello para su validez interna.
+  </div>
+</div>
+
+</body>
+</html>

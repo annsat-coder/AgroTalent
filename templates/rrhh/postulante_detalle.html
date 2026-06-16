@@ -93,22 +93,21 @@
     </div>
     {% endif %}
 
-    <!-- QR -->
-    {% if postulante.pase_qr %}
+    <!-- Validación en fundo -->
+    {% if postulante.estado_proceso in ['seleccionado', 'incorporado'] %}
     <div class="card border-0 shadow-sm rounded-4 mb-3">
       <div class="card-body p-4">
-        <h6 class="fw-bold mb-3"><i class="bi bi-qr-code text-success"></i> Pase QR</h6>
-        <div class="d-flex align-items-center gap-4">
-          <img src="{{ url_for('static', filename='qr/' ~ postulante.pase_qr.imagen_path) }}" style="width:100px" class="border rounded-3">
-          <div class="small">
-            <div><span class="text-muted">Estado:</span> <span class="badge {% if postulante.pase_qr.validado %}bg-primary{% else %}bg-secondary{% endif %}">{{ 'Validado' if postulante.pase_qr.validado else 'Sin validar' }}</span></div>
-            <div class="mt-1"><span class="text-muted">Generado:</span> <strong>{{ postulante.pase_qr.generado_en.strftime('%d/%m/%Y %H:%M') }}</strong></div>
-            {% if postulante.pase_qr.validado_en %}
-            <div class="mt-1"><span class="text-muted">Validado:</span> <strong>{{ postulante.pase_qr.validado_en.strftime('%d/%m/%Y %H:%M') }}</strong></div>
-            {% endif %}
-          </div>
+        <h6 class="fw-bold mb-3"><i class="bi bi-person-check-fill text-success"></i> Validación en fundo</h6>
+        <div class="small">
+          <span class="text-muted">Estado:</span>
+          <span class="badge {% if postulante.validado_en_fundo %}bg-primary{% else %}bg-secondary{% endif %}">
+            {{ 'Validado' if postulante.validado_en_fundo else 'Sin validar' }}
+          </span>
+          {% if postulante.validado_en_fundo_en %}
+          <div class="mt-1"><span class="text-muted">Validado:</span> <strong>{{ postulante.validado_en_fundo_en.strftime('%d/%m/%Y %H:%M') }}</strong></div>
+          {% endif %}
         </div>
-        {% if postulante.pase_qr.validado and postulante.estado_proceso == 'seleccionado' %}
+        {% if postulante.validado_en_fundo and postulante.estado_proceso == 'seleccionado' %}
         <form method="POST" action="{{ url_for('rrhh_incorporar', pid=postulante.id) }}" class="mt-3">
           <button type="submit" class="btn btn-success rounded-3" onclick="return confirm('¿Confirmas la incorporación de este postulante?')">
             <i class="bi bi-check-circle-fill"></i> Confirmar incorporación

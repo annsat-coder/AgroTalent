@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Constancia de Habilitación{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-7 col-lg-5">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <a href="{{ url_for('postulante_dashboard') }}" class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-arrow-left"></i></a>
+      <h5 class="fw-bold mb-0">Constancia de Habilitación</h5>
+    </div>
+
+    <div class="card shadow-sm constancia-card mb-3">
+      {% if estado == 'habilitado' %}
+      <div class="constancia-estado-bar bg-habilitado">
+        <i class="bi bi-check-circle-fill" style="font-size:2.6rem"></i>
+        <h5 class="fw-bold mt-2 mb-0">Habilitado para firma de contrato</h5>
+      </div>
+      {% elif estado == 'evaluacion' %}
+      <div class="constancia-estado-bar bg-evaluacion">
+        <i class="bi bi-heart-pulse-fill" style="font-size:2.6rem"></i>
+        <h5 class="fw-bold mt-2 mb-0">Derivado a evaluación médica</h5>
+      </div>
+      {% elif estado == 'espera' %}
+      <div class="constancia-estado-bar bg-espera">
+        <i class="bi bi-hourglass-split" style="font-size:2.6rem"></i>
+        <h5 class="fw-bold mt-2 mb-0">En lista de espera</h5>
+      </div>
+      {% else %}
+      <div class="constancia-estado-bar bg-pendiente">
+        <i class="bi bi-clock-history" style="font-size:2.6rem"></i>
+        <h5 class="fw-bold mt-2 mb-0">Pendiente de evaluación</h5>
+      </div>
+      {% endif %}
+
+      <div class="card-body p-4">
+        <div class="bg-light rounded-3 p-3 mb-3" style="font-size:.95rem">
+          <div class="row g-2">
+            <div class="col-12"><span class="text-muted">Nombre completo:</span><br>
+              <strong>{{ postulante.nombres }} {{ postulante.apellidos }}</strong></div>
+            <div class="col-6"><span class="text-muted">DNI:</span><br><strong>{{ postulante.dni }}</strong></div>
+            <div class="col-6"><span class="text-muted">Puesto:</span><br><strong>{{ postulante.puesto or '—' }}</strong></div>
+            {% if conv %}
+            <div class="col-6"><span class="text-muted">Fecha presentación:</span><br>
+              <strong>{{ conv.fecha_presentacion.strftime('%d/%m/%Y') }}</strong></div>
+            <div class="col-6"><span class="text-muted">Horario:</span><br>
+              <strong>{{ conv.hora_presentacion | hora_ampm }}</strong></div>
+            <div class="col-12"><span class="text-muted">Lugar:</span><br>
+              <strong>{{ conv.lugar_presentacion }}</strong></div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if postulante.codigo_constancia %}
+        <div class="text-center mb-3">
+          <div class="text-muted small mb-1">Código de habilitación</div>
+          <div class="constancia-codigo" style="font-size:1.3rem; color:var(--verde)">{{ postulante.codigo_constancia }}</div>
+        </div>
+        {% endif %}
+
+        {% if estado == 'habilitado' %}
+        <div class="alert alert-success rounded-3 small mb-3">
+          <i class="bi bi-info-circle-fill"></i>
+          Tu registro fue completado exitosamente. Preséntate con tu DNI el día y horario asignados para continuar con el proceso.
+        </div>
+        <div class="d-grid">
+          <a href="{{ url_for('postulante_constancia_imprimir') }}" target="_blank"
+             class="btn btn-success btn-lg rounded-3">
+            <i class="bi bi-download"></i> Descargar constancia en PDF
+          </a>
+        </div>
+        {% elif estado == 'evaluacion' %}
+        <div class="alert alert-info rounded-3 small mb-0">
+          <i class="bi bi-info-circle-fill"></i>
+          Fuiste derivado a evaluación médica en el tópico. Revisa tu cita programada en tu panel principal.
+        </div>
+        {% elif estado == 'espera' %}
+        <div class="alert alert-warning rounded-3 small mb-0">
+          <i class="bi bi-info-circle-fill"></i>
+          No hay vacantes disponibles por el momento. Te avisaremos si se libera un cupo en tu puesto.
+        </div>
+        {% else %}
+        <div class="alert alert-secondary rounded-3 small mb-0">
+          <i class="bi bi-info-circle-fill"></i>
+          Tu proceso aún está en evaluación. Esta constancia se actualizará cuando tengas una vacante confirmada.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

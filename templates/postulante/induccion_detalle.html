@@ -74,13 +74,11 @@
             <p class="fw-semibold mb-2">{{ loop.index }}. {{ preg.texto }}</p>
             <div class="d-grid gap-2">
               {% for opcion, letra in [(preg.opcion_a,'a'),(preg.opcion_b,'b'),(preg.opcion_c,'c')] %}
-              <div class="form-check option-card rounded-3 p-3 border">
-                <input class="form-check-input" type="radio" name="preg_{{ preg.id }}"
-                       id="p{{ preg.id }}_{{ letra }}" value="{{ letra }}" required>
-                <label class="form-check-label w-100" for="p{{ preg.id }}_{{ letra }}">
-                  <span class="badge bg-light text-dark border me-2">{{ letra.upper() }}</span> {{ opcion }}
-                </label>
-              </div>
+              <label class="option-card d-flex align-items-center gap-3 p-3" for="p{{ preg.id }}_{{ letra }}">
+                <input type="radio" name="preg_{{ preg.id }}" id="p{{ preg.id }}_{{ letra }}" value="{{ letra }}" required>
+                <span class="option-card-letter">{{ letra.upper() }}</span>
+                <span class="option-card-label flex-grow-1">{{ opcion }}</span>
+              </label>
               {% endfor %}
             </div>
           </div>

@@ -44,7 +44,7 @@
         {% set paso1_ok = postulante.datos_completos %}
         {% set paso2_ok = estado not in ['registrado', 'en_proceso'] or (estado == 'en_proceso' and postulante.inducciones | selectattr('aprobado') | list | length == 4) %}
         {% set paso3_ok = postulante.declaracion is not none %}
-        {% set paso4_ok = postulante.pase_qr is not none %}
+        {% set paso4_ok = postulante.validado_en_fundo %}
 
         <!-- Paso 1: Datos personales -->
         <div class="d-flex gap-3 mb-3 align-items-start pt-2">
@@ -117,7 +117,7 @@
 
         <hr class="my-2">
 
-        <!-- Paso 4: Pase QR -->
+        <!-- Paso 4: Presentación en el fundo -->
         <div class="d-flex gap-3 align-items-start pt-2 {% if not paso3_ok %}opacity-50{% endif %}">
           <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle fw-bold
             {% if paso4_ok %}bg-success text-white{% else %}bg-light text-muted{% endif %}"
@@ -125,14 +125,21 @@
             {% if paso4_ok %}<i class="bi bi-check-lg"></i>{% else %}4{% endif %}
           </div>
           <div class="flex-grow-1">
-            <div class="fw-semibold">Pase QR</div>
+            <div class="fw-semibold">Presentación en el lugar de trabajo</div>
             {% if paso4_ok %}
-            <div class="text-muted small">Tu pase está listo. Preséntalo en el fundo.</div>
-            <a href="{{ url_for('postulante_qr') }}" class="btn btn-success btn-sm mt-2 px-3 rounded-3">
-              <i class="bi bi-qr-code"></i> Ver mi pase QR
+            <div class="text-muted small">Tu DNI fue validado en el ingreso.</div>
+            {% elif estado in ['seleccionado', 'incorporado'] and conv %}
+            <div class="alert alert-info rounded-3 small mt-2 mb-2 py-2">
+              <i class="bi bi-calendar-check-fill"></i>
+              Preséntate el <strong>{{ conv.fecha_presentacion.strftime('%d/%m/%Y') }}</strong>
+              a las <strong>{{ conv.hora_presentacion | hora_ampm }}</strong>
+              en <strong>{{ conv.lugar_presentacion }}</strong>. Lleva tu DNI para la validación en el ingreso.
+            </div>
+            <a href="{{ url_for('postulante_constancia') }}" class="btn btn-success btn-sm mt-1 px-3 rounded-3">
+              <i class="bi bi-file-earmark-text-fill"></i> Ver mi constancia de habilitación
             </a>
             {% else %}
-            <div class="text-muted small">Se generará cuando tengas una vacante confirmada.</div>
+            <div class="text-muted small">Se confirmará la fecha y lugar cuando tengas una vacante confirmada.</div>
             {% endif %}
           </div>
         </div>
