@@ -95,19 +95,143 @@ body {
   border-color: var(--verde);
 }
 
-/* ── Option cards (radio como tarjeta) ──────── */
+/* ── Option cards (alternativas como tarjeta, sin radio visible) ──────── */
 .option-card {
   cursor: pointer;
-  transition: border-color .15s, background .15s;
+  display: block;
+  border: 1.5px solid #e2e5e0;
+  border-radius: .9rem;
+  background: #fff;
+  transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+}
+.option-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
 }
 .option-card:hover {
-  border-color: var(--verde-medio) !important;
-  background-color: var(--verde-claro);
+  border-color: var(--verde-medio);
 }
-.form-check-input:checked ~ .option-card,
-.option-card:has(.form-check-input:checked) {
-  border-color: var(--verde) !important;
+.option-card:has(input:checked) {
+  border-color: var(--verde);
   background-color: var(--verde-claro);
+  box-shadow: 0 2px 10px rgba(26,110,46,.08);
+}
+.option-card:has(input:checked) .option-card-label {
+  color: var(--verde);
+  font-weight: 600;
+}
+.option-card-letter {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .8rem;
+  font-weight: 700;
+  background: var(--gris);
+  color: var(--muted);
+  transition: background-color .15s ease, color .15s ease;
+}
+.option-card:has(input:checked) .option-card-letter {
+  background: var(--verde);
+  color: #fff;
+}
+
+/* ── Segmented toggle (Sí / No) ──────────────── */
+.toggle-si-no {
+  display: inline-flex;
+  border: 1.5px solid #e2e5e0;
+  border-radius: .7rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.toggle-si-no input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+.toggle-si-no .toggle-opt {
+  margin: 0;
+  padding: .5rem 1.1rem;
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: #fff;
+  cursor: pointer;
+  transition: background-color .15s ease, color .15s ease;
+  user-select: none;
+}
+.toggle-si-no .toggle-opt + .toggle-opt {
+  border-left: 1.5px solid #e2e5e0;
+}
+.toggle-si-no .toggle-opt.is-active {
+  background: var(--verde);
+  color: #fff;
+}
+
+/* ── Antecedente row (declaración jurada) ────── */
+.antecedente-row {
+  border: 1.5px solid #e9ecef;
+  border-radius: .9rem;
+  padding: .9rem 1rem;
+  background: #fff;
+}
+
+/* ── Confirmación destacada ───────────────────── */
+.confirmacion-card {
+  border: 2px solid var(--verde);
+  border-radius: 1rem;
+  background: var(--verde-claro);
+  padding: 1.1rem 1.2rem;
+  cursor: pointer;
+}
+.confirmacion-card input[type="checkbox"] {
+  width: 1.4em;
+  height: 1.4em;
+  margin-top: .1em;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.confirmacion-card label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--texto);
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+/* ── Botón con estado de carga ───────────────── */
+.btn-loading .btn-text { display: inline; }
+.btn-loading .spinner-border { display: none; }
+.btn[data-loading="true"] .btn-text { display: none; }
+.btn[data-loading="true"] .spinner-border { display: inline-block !important; }
+
+/* ── Constancia de habilitación ──────────────── */
+.constancia-card {
+  border-radius: 1.2rem;
+  border: none;
+  overflow: hidden;
+}
+.constancia-estado-bar {
+  padding: 1.5rem 1.5rem 1.2rem;
+  text-align: center;
+  color: #fff;
+}
+.constancia-estado-bar.bg-habilitado { background: linear-gradient(135deg, var(--verde) 0%, #2e7d32 100%); }
+.constancia-estado-bar.bg-pendiente { background: linear-gradient(135deg, #b8860b 0%, #d4a017 100%); }
+.constancia-estado-bar.bg-espera { background: linear-gradient(135deg, #6c757d 0%, #495057 100%); }
+.constancia-estado-bar.bg-evaluacion { background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); }
+.constancia-codigo {
+  font-family: 'Courier New', monospace;
+  letter-spacing: .12em;
+  font-weight: 700;
 }
 
 /* ── Steps / Pasos ──────────────────────────── */
@@ -129,11 +253,6 @@ body {
 }
 .table-hover tbody tr:hover {
   background-color: var(--verde-claro);
-}
-
-/* ── QR container ───────────────────────────── */
-.qr-container {
-  border: 2px solid #e0e0e0 !important;
 }
 
 /* ── Footer ─────────────────────────────────── */
