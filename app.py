@@ -108,6 +108,11 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/privacidad')
+def privacidad():
+    return render_template('legal/privacidad.html')
+
+
 # ── AUTH ─────────────────────────────────────────────────────────────────────
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -171,6 +176,7 @@ def registro():
         celular = request.form.get('celular', '').strip()
         password = request.form.get('password', '').strip()
         confirmar = request.form.get('confirmar', '').strip()
+        acepta_privacidad = request.form.get('acepta_privacidad')
 
         if len(dni) != 8 or not dni.isdigit():
             flash('El DNI debe tener 8 dígitos.', 'danger')
@@ -183,6 +189,9 @@ def registro():
             return render_template('auth/registro.html')
         if len(password) < 6:
             flash('La contraseña debe tener al menos 6 caracteres.', 'danger')
+            return render_template('auth/registro.html')
+        if not acepta_privacidad:
+            flash('Debes aceptar la Política de Privacidad para continuar.', 'danger')
             return render_template('auth/registro.html')
 
         otp = generar_otp()
@@ -1007,6 +1016,7 @@ def medico_evaluar(cita_id):
         else:
             # liberar vacante
             puesto_conv = None
+            
             if conv and p.puesto:
                 puesto_conv = PuestoConvocatoria.query.filter_by(
                     convocatoria_id=conv.id, nombre_puesto=p.puesto).first()
