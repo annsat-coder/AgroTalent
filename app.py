@@ -1003,7 +1003,7 @@ def medico_evaluar(cita_id):
             registrar_historial(p, 'seleccionado', f'Médico: {current_user.nombres} — apto')
             asegurar_codigo_constancia(p)
             db.session.commit()
-            flash(f'Postulante marcado como APTO. {mensaje_presentacion(conv)}', 'success')
+            flash(f'Postulante marcado como APTO.', 'success')
         else:
             # liberar vacante
             puesto_conv = None
