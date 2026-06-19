@@ -107,13 +107,6 @@
   </div>
   {% endif %}
 
-  {% if postulante.codigo_constancia %}
-  <div class="codigo-box">
-    <div class="label">Código de habilitación</div>
-    <div class="codigo">{{ postulante.codigo_constancia }}</div>
-  </div>
-  {% endif %}
-
   <div class="mensaje">
     {% if estado == 'habilitado' %}
     Tu registro fue completado exitosamente. Preséntate con tu DNI el día y horario asignados para continuar con el proceso de contratación.
