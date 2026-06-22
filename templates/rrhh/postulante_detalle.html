@@ -108,13 +108,17 @@
           {% endif %}
         </div>
         {% if postulante.validado_en_fundo and postulante.estado_proceso == 'seleccionado' %}
-        <div class="d-flex gap-2 mt-3 flex-wrap">
+        <div class="mt-3">
           <form method="POST" action="{{ url_for('rrhh_incorporar', pid=postulante.id) }}">
             <button type="submit" class="btn btn-success rounded-3"
                     onclick="return confirm('¿Confirmas la incorporación de {{ postulante.nombres }} {{ postulante.apellidos }}?')">
               <i class="bi bi-check-circle-fill"></i> Confirmar incorporación
             </button>
           </form>
+        </div>
+        {% endif %}
+        {% if postulante.estado_proceso == 'seleccionado' %}
+        <div class="mt-2">
           <form method="POST" action="{{ url_for('rrhh_no_presento', pid=postulante.id) }}">
             <button type="submit" class="btn btn-outline-danger rounded-3"
                     onclick="return confirm('¿Confirmas que {{ postulante.nombres }} {{ postulante.apellidos }} no se presentó? Esto liberará su vacante.')">
