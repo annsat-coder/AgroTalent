@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Recuperar contraseña{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-7 col-lg-5">
+    <div class="card border-0 shadow-sm rounded-4 mt-4">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <i class="bi bi-lock-fill text-success" style="font-size:2.2rem"></i>
+          <h5 class="fw-bold mt-2">Recuperar contraseña</h5>
+          <p class="text-muted small">Ingresa tu DNI y te enviaremos un código para restablecer tu contraseña.</p>
+        </div>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">DNI</label>
+            <input type="text" name="dni" class="form-control rounded-3"
+                   placeholder="8 dígitos" maxlength="8" autofocus required>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-send-fill"></i> Enviar código
+            </button>
+          </div>
+        </form>
+        <hr class="my-3">
+        <p class="text-center text-muted small mb-0">
+          ¿Recordaste tu contraseña? <a href="{{ url_for('login') }}" class="text-success">Inicia sesión</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

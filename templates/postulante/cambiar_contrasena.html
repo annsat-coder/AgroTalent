@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Cambiar contraseña{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-6 col-lg-5">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <a href="{{ url_for('postulante_dashboard') }}" class="btn btn-sm btn-outline-secondary rounded-3">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      <h5 class="fw-bold mb-0">Cambiar contraseña</h5>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Contraseña actual</label>
+            <input type="password" name="password_actual" class="form-control rounded-3"
+                   placeholder="Tu contraseña actual" autofocus required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nueva contraseña</label>
+            <input type="password" name="password_nueva" class="form-control rounded-3"
+                   placeholder="Mínimo 6 caracteres" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Confirmar nueva contraseña</label>
+            <input type="password" name="password_confirmar" class="form-control rounded-3"
+                   placeholder="Repite la nueva contraseña" required>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-shield-lock-fill"></i> Actualizar contraseña
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

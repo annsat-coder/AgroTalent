@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Restablecer contraseña{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-7 col-lg-5">
+    <div class="card border-0 shadow-sm rounded-4 mt-4">
+      <div class="card-body p-4">
+
+        {% if verificado %}
+        {# Segunda fase: ya verificó el código, ahora ingresa la nueva contraseña #}
+        <div class="text-center mb-4">
+          <i class="bi bi-shield-check-fill text-success" style="font-size:2.2rem"></i>
+          <h5 class="fw-bold mt-2">Nueva contraseña</h5>
+          <p class="text-muted small">Ingresa y confirma tu nueva contraseña.</p>
+        </div>
+        <form method="POST">
+          <input type="hidden" name="accion" value="nueva">
+          <input type="hidden" name="codigo" value="{{ codigo }}">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nueva contraseña</label>
+            <input type="password" name="nueva" class="form-control rounded-3"
+                   placeholder="Mínimo 6 caracteres" autofocus required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Confirmar contraseña</label>
+            <input type="password" name="confirmar" class="form-control rounded-3"
+                   placeholder="Repite la contraseña" required>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-check-circle-fill"></i> Guardar nueva contraseña
+            </button>
+          </div>
+        </form>
+
+        {% else %}
+        {# Primera fase: verificar código OTP #}
+        <div class="text-center mb-4">
+          <i class="bi bi-phone-fill text-success" style="font-size:2.2rem"></i>
+          <h5 class="fw-bold mt-2">Verifica tu identidad</h5>
+          <p class="text-muted small">Ingresa el código de verificación enviado al celular registrado con el DNI <strong>{{ usuario.dni }}</strong>.</p>
+        </div>
+        <form method="POST" id="formVerificar">
+          <input type="hidden" name="accion" value="verificar">
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Código de verificación</label>
+            <input type="text" name="codigo" id="codigoInput" class="form-control form-control-lg rounded-3 text-center"
+                   placeholder="- - - - - -" maxlength="6" autocomplete="one-time-code" autofocus required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nueva contraseña</label>
+            <input type="password" name="nueva" class="form-control rounded-3" placeholder="Mínimo 6 caracteres" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Confirmar contraseña</label>
+            <input type="password" name="confirmar" class="form-control rounded-3" placeholder="Repite la contraseña" required>
+          </div>
+          <div class="d-grid mb-3">
+            <button type="submit" id="btnVerificar" class="btn btn-success btn-lg rounded-3">
+              <i class="bi bi-check-circle-fill"></i> Verificar y guardar
+            </button>
+          </div>
+        </form>
+        <form method="POST" class="text-center">
+          <input type="hidden" name="accion" value="reenviar">
+          <button type="submit" id="btnReenviar" class="btn btn-link text-success small p-0" disabled>
+            Reenviar código
+          </button>
+          <span id="reenviarLabel" class="text-muted small ms-1"></span>
+        </form>
+        <p class="text-center text-muted small mt-3 mb-0">
+          <a href="{{ url_for('recuperar_contrasena') }}" class="text-muted">← Volver</a>
+        </p>
+
+        <script>
+        (function() {
+          var restante = 300;
+          var timerEl = document.createElement('span');
+          timerEl.className = 'text-muted small ms-2';
+          document.getElementById('btnReenviar').after(timerEl);
+          function actualizar() {
+            var m = String(Math.floor(restante/60)).padStart(2,'0');
+            var s = String(restante%60).padStart(2,'0');
+            timerEl.textContent = m+':'+s;
+            if (restante <= 0) {
+              clearInterval(intervalo);
+              timerEl.textContent = '00:00';
+              timerEl.classList.add('text-danger');
+              document.getElementById('btnReenviar').disabled = false;
+              document.getElementById('btnVerificar').disabled = true;
+              document.getElementById('codigoInput').disabled = true;
+            }
+            restante--;
+          }
+          actualizar();
+          var intervalo = setInterval(actualizar, 1000);
+        })();
+        </script>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

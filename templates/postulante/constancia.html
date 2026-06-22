@@ -49,6 +49,13 @@
           </div>
         </div>
 
+        {% if postulante.codigo_constancia %}
+        <div class="text-center mb-3">
+          <div class="text-muted small mb-1">Código de habilitación</div>
+          <div class="constancia-codigo" style="font-size:1.3rem; color:var(--verde)">{{ postulante.codigo_constancia }}</div>
+        </div>
+        {% endif %}
+
         {% if estado == 'habilitado' %}
         <div class="alert alert-success rounded-3 small mb-3">
           <i class="bi bi-info-circle-fill"></i>

@@ -250,6 +250,89 @@ def verificar_otp(dni):
     return render_template('auth/verificar_otp.html', usuario=usuario)
 
 
+@app.route('/recuperar-contrasena', methods=['GET', 'POST'])
+def recuperar_contrasena():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard_redirect'))
+    if request.method == 'POST':
+        dni = request.form.get('dni', '').strip()
+        usuario = Usuario.query.filter_by(dni=dni, verificado=True).first()
+        if not usuario:
+            flash('No encontramos una cuenta verificada con ese DNI.', 'danger')
+            return render_template('auth/recuperar_contrasena.html')
+        otp = generar_otp()
+        usuario.otp_code = otp
+        usuario.otp_expira = datetime.utcnow() + timedelta(minutes=5)
+        db.session.commit()
+        flash('Se generó un código de recuperación. En producción se enviaría por SMS.', 'info')
+        return redirect(url_for('recuperar_otp', dni=dni))
+    return render_template('auth/recuperar_contrasena.html')
+
+
+@app.route('/recuperar-contrasena/<dni>', methods=['GET', 'POST'])
+def recuperar_otp(dni):
+    usuario = Usuario.query.filter_by(dni=dni).first_or_404()
+    if request.method == 'POST':
+        accion = request.form.get('accion')
+        if accion == 'reenviar':
+            otp = generar_otp()
+            usuario.otp_code = otp
+            usuario.otp_expira = datetime.utcnow() + timedelta(minutes=5)
+            db.session.commit()
+            flash('Nuevo código generado.', 'info')
+            return redirect(url_for('recuperar_otp', dni=dni))
+
+        codigo = request.form.get('codigo', '').strip()
+        if not usuario.otp_expira or datetime.utcnow() > usuario.otp_expira:
+            flash('El código expiró. Solicita uno nuevo.', 'danger')
+            return render_template('auth/recuperar_otp.html', usuario=usuario)
+        if codigo != usuario.otp_code:
+            flash('Código incorrecto.', 'danger')
+            return render_template('auth/recuperar_otp.html', usuario=usuario)
+
+        nueva = request.form.get('nueva', '').strip()
+        confirmar = request.form.get('confirmar', '').strip()
+        if len(nueva) < 6:
+            flash('La contraseña debe tener al menos 6 caracteres.', 'danger')
+            return render_template('auth/recuperar_otp.html', usuario=usuario, verificado=True, codigo=codigo)
+        if nueva != confirmar:
+            flash('Las contraseñas no coinciden.', 'danger')
+            return render_template('auth/recuperar_otp.html', usuario=usuario, verificado=True, codigo=codigo)
+
+        usuario.set_password(nueva)
+        usuario.otp_code = None
+        usuario.otp_expira = None
+        db.session.commit()
+        flash('¡Contraseña actualizada correctamente! Ya puedes iniciar sesión.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('auth/recuperar_otp.html', usuario=usuario)
+
+
+@app.route('/postulante/cambiar-contrasena', methods=['GET', 'POST'])
+@login_required
+@rol_requerido('postulante')
+def postulante_cambiar_contrasena():
+    if request.method == 'POST':
+        actual = request.form.get('password_actual', '').strip()
+        nueva = request.form.get('password_nueva', '').strip()
+        confirmar = request.form.get('password_confirmar', '').strip()
+        if not current_user.check_password(actual):
+            flash('La contraseña actual es incorrecta.', 'danger')
+            return render_template('postulante/cambiar_contrasena.html')
+        if len(nueva) < 6:
+            flash('La nueva contraseña debe tener al menos 6 caracteres.', 'danger')
+            return render_template('postulante/cambiar_contrasena.html')
+        if nueva != confirmar:
+            flash('Las contraseñas no coinciden.', 'danger')
+            return render_template('postulante/cambiar_contrasena.html')
+        current_user.set_password(nueva)
+        db.session.commit()
+        flash('Contraseña actualizada correctamente.', 'success')
+        return redirect(url_for('postulante_dashboard'))
+    return render_template('postulante/cambiar_contrasena.html')
+
+
 @app.route('/dashboard')
 @login_required
 def dashboard_redirect():
@@ -658,6 +741,26 @@ def rrhh_incorporar(pid):
     return redirect(url_for('rrhh_postulante_detalle', pid=pid))
 
 
+@app.route('/rrhh/postulante/<int:pid>/no-presento', methods=['POST'])
+@login_required
+@rol_requerido('rrhh')
+def rrhh_no_presento(pid):
+    p = Postulante.query.get_or_404(pid)
+    if p.estado_proceso == 'seleccionado':
+        conv = convocatoria_activa()
+        if conv and p.puesto:
+            puesto_conv = PuestoConvocatoria.query.filter_by(
+                convocatoria_id=conv.id, nombre_puesto=p.puesto).first()
+            if puesto_conv:
+                puesto_conv.vacantes_ocupadas = max(0, puesto_conv.vacantes_ocupadas - 1)
+        registrar_historial(p, 'no_se_presento', f'Registrado por {current_user.nombres}')
+        db.session.commit()
+        flash(f'{p.nombres} {p.apellidos} marcado como No se presentó. La vacante ha sido liberada.', 'warning')
+    else:
+        flash('Solo se puede marcar como No se presentó a un postulante seleccionado.', 'danger')
+    return redirect(url_for('rrhh_postulante_detalle', pid=pid))
+
+
 @app.route('/rrhh/convocatoria', methods=['GET', 'POST'])
 @login_required
 @rol_requerido('rrhh')
@@ -692,6 +795,10 @@ def rrhh_convocatoria():
                         puesto.vacantes_total = vacantes
                     elif vacantes > 0:
                         db.session.add(PuestoConvocatoria(convocatoria_id=conv.id, nombre_puesto=nombre, vacantes_total=vacantes))
+                # Sincronizar la fecha del DiaTopico con la nueva fecha de presentación
+                dia_topico = DiaTopico.query.filter_by(convocatoria_id=conv.id).first()
+                if dia_topico:
+                    dia_topico.fecha = conv.fecha_presentacion
                 db.session.commit()
                 flash('Convocatoria actualizada correctamente.', 'success')
             except ValueError:

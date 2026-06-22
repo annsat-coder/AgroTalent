@@ -56,10 +56,15 @@
                    placeholder="usuario@empresa-agroindustrial.pe" disabled>
           </div>
 
-          <div class="mb-4">
+          <div class="mb-3">
             <label class="form-label fw-semibold">Contraseña</label>
             <input type="password" name="password" class="form-control form-control-lg rounded-3"
                    placeholder="••••••••" required>
+            <div class="text-end mt-1">
+              <a href="{{ url_for('recuperar_contrasena') }}" class="text-muted small">
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
           </div>
 
           <div class="d-grid">
